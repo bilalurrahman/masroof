@@ -1,0 +1,78 @@
+<section class="capture">
+  <div class="hero card">
+    <div class="hero-head">
+      <div>
+        <p class="mono-label eyebrow">◆ CAPTURE</p>
+        <h1>{{ i18n.t('capture.heading') }}</h1>
+      </div>
+      @if (monthTotal() !== null) {
+        <div class="month-total">
+          <span class="mono-label">{{ i18n.t('capture.monthTotal') }}</span>
+          <strong class="num">{{ monthTotal() | money: currency() }}</strong>
+        </div>
+      }
+    </div>
+
+    <textarea
+      class="input paste"
+      [rows]="batch() ? 6 : 3"
+      [placeholder]="i18n.t('capture.placeholder')"
+      [ngModel]="text()"
+      (ngModelChange)="text.set($event)"
+      (keydown.control.enter)="submit()"
+    ></textarea>
+
+    <div class="hero-actions">
+      <label class="batch-toggle">
+        <input type="checkbox" [ngModel]="batch()" (ngModelChange)="batch.set($event)" />
+        {{ i18n.t('capture.batch') }}
+      </label>
+      <button class="btn" [disabled]="parsing() || !text().trim()" (click)="submit()">
+        {{ parsing() ? i18n.t('capture.parsing') : i18n.t('capture.parse') }}
+      </button>
+    </div>
+  </div>
+
+  @if (recent().length) {
+    <h2 class="section-title mono-label">{{ i18n.t('capture.recent') }}</h2>
+    <div class="recent-list">
+      @for (row of recent(); track row.id) {
+        <div class="card recent-row">
+          <div class="row-main">
+            <div class="row-top">
+              <span class="amount num" [class.credit]="row.direction === 'credit'">
+                {{ row.direction === 'credit' ? '+' : '−' }}{{ row.amount | money: row.currency }}
+              </span>
+              <app-confidence-badge [confidence]="row.confidence" />
+            </div>
+            <div class="row-sub muted">
+              {{ row.counterparty || '—' }}
+              @if (row.channel) { · {{ row.channel }} }
+              · {{ row.txnDate }}
+            </div>
+            @if (row.hintsUsed.length) {
+              <div class="hints">
+                @for (h of row.hintsUsed; track h) {
+                  <span class="hint">💡 {{ h }}</span>
+                }
+              </div>
+            }
+          </div>
+          <div class="row-cat">
+            <app-category-chip [name]="row.category.name" [color]="categoriesStore.colorFor(row.category.code)" />
+            <select
+              class="input cat-select"
+              [ngModel]="row.category.code"
+              (ngModelChange)="correct(row, $event)"
+              [attr.aria-label]="i18n.t('common.category')"
+            >
+              @for (c of categoriesStore.categories(); track c.code) {
+                <option [value]="c.code">{{ c.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>

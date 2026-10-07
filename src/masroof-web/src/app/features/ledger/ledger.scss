@@ -1,0 +1,102 @@
+.filters {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.filters .input {
+  width: auto;
+}
+.filters .grow {
+  flex: 1;
+  min-width: 10rem;
+}
+.review-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+.rows {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.row-skel {
+  height: 3.1rem;
+  margin: 0.3rem 0;
+}
+.trow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 1.1rem;
+  border-block-end: 1px solid var(--border);
+}
+.trow:last-child {
+  border-block-end: none;
+}
+.tmain {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  min-width: 0;
+}
+.eyebrow {
+  margin: 0 0 0.35rem;
+}
+.amount {
+  font-weight: 600;
+  min-width: 7rem;
+}
+.amount.credit {
+  color: var(--ok);
+}
+.cp {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.date {
+  font-size: 0.8rem;
+}
+.tmeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.chip-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.cat-select {
+  width: auto;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.82rem;
+}
+.del {
+  border: none;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.del:hover {
+  color: var(--danger);
+}
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}

@@ -1,0 +1,47 @@
+<section class="insights">
+  <p class="mono-label eyebrow">◆ INSIGHTS</p>
+  <h1>{{ i18n.t('insights.heading') }}</h1>
+
+  @if (loading()) {
+    <div class="grid">
+      <div class="skeleton tile-skel"></div>
+      <div class="skeleton tile-skel"></div>
+    </div>
+  } @else if (!hasData()) {
+    <app-empty-state [message]="i18n.t('insights.empty')" icon="📊" />
+  } @else {
+    @if (summary(); as s) {
+      <div class="stats">
+        <div class="card stat">
+          <span class="mono-label">{{ i18n.t('insights.spent') }}</span>
+          <strong class="debit num">{{ s.totalDebit | money: currency() }}</strong>
+          @if (deltaPct() !== null) {
+            <span class="delta num" [class.up]="deltaPct()! > 0" [class.down]="deltaPct()! < 0">
+              {{ deltaPct()! > 0 ? '▲' : '▼' }} {{ (deltaPct()! | number: '1.0-0') }}% {{ i18n.t('insights.vsLast') }}
+            </span>
+          }
+        </div>
+        <div class="card stat">
+          <span class="mono-label">{{ i18n.t('insights.received') }}</span>
+          <strong class="credit num">{{ s.totalCredit | money: currency() }}</strong>
+          <span class="mono-label small">{{ s.transactionCount }} TXN · {{ s.month }}</span>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card chart-card">
+          <h2>{{ i18n.t('insights.byCategory') }}</h2>
+          @if (donutOption(); as opt) {
+            <div class="chart" appEchart [option]="opt" [theme]="echTheme()"></div>
+          }
+        </div>
+        <div class="card chart-card">
+          <h2>{{ i18n.t('insights.trend') }}</h2>
+          @if (trendOption(); as opt) {
+            <div class="chart" appEchart [option]="opt" [theme]="echTheme()"></div>
+          }
+        </div>
+      </div>
+    }
+  }
+</section>

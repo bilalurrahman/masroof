@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Masroof.Api/Masroof.Api.csproj" />
+    <Project Path="src/Masroof.Application/Masroof.Application.csproj" />
+    <Project Path="src/Masroof.Domain/Masroof.Domain.csproj" />
+    <Project Path="src/Masroof.Infrastructure/Masroof.Infrastructure.csproj" />
+    <Project Path="src/Masroof.Worker/Masroof.Worker.csproj" />
+  </Folder>
+</Solution>

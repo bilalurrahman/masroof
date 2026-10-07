@@ -1,0 +1,42 @@
+<section class="rules">
+  <p class="mono-label eyebrow">◆ LEARNED RULES</p>
+  <h1>{{ i18n.t('rules.heading') }}</h1>
+
+  <div class="search-row">
+    <input
+      class="input"
+      type="search"
+      [placeholder]="i18n.t('rules.search')"
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)"
+      (keydown.enter)="load()"
+    />
+  </div>
+
+  @if (loading()) {
+    <div class="list">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="skeleton rule-skel"></div>
+      }
+    </div>
+  } @else if (rules().length === 0) {
+    <app-empty-state [message]="i18n.t('rules.empty')" icon="🧠" />
+  } @else {
+    <div class="list card">
+      @for (rule of rules(); track rule.ruleId) {
+        <div class="rule">
+          <div class="rule-main">
+            <span class="subject">{{ rule.subject }}</span>
+            <span class="arrow">→</span>
+            <app-category-chip [name]="rule.categoryName" [color]="categoriesStore.colorFor(rule.categoryCode)" />
+          </div>
+          <div class="rule-meta">
+            <span class="muted">{{ rule.hitCount }} {{ i18n.t('rules.hits') }}</span>
+            @if (rule.hasEmbedding) { <span class="embedded" title="Embedded for vector recall">◆</span> }
+            <button class="btn ghost small" (click)="forget(rule)">{{ i18n.t('rules.forget') }}</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>

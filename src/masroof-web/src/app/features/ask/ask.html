@@ -1,0 +1,55 @@
+<section class="ask">
+  <p class="mono-label eyebrow">◆ ASK</p>
+  <h1>{{ i18n.t('ask.heading') }}</h1>
+
+  @if (turns().length === 0) {
+    <div class="suggestions card">
+      <p class="muted">{{ i18n.t('ask.suggestions') }}</p>
+      @for (s of suggestions; track s) {
+        <button class="suggest" (click)="ask(s)">{{ s }}</button>
+      }
+    </div>
+  }
+
+  <div class="thread">
+    @for (turn of turns(); track turn.id) {
+      <div class="bubble" [class.user]="turn.role === 'user'" [class.assistant]="turn.role === 'assistant'">
+        <p class="text">{{ turn.text }}</p>
+        @if (turn.role === 'assistant' && turn.tools && turn.tools.length) {
+          <button class="data-toggle" (click)="toggleData(turn)">
+            {{ turn.showData ? '▾' : '▸' }} {{ i18n.t('ask.dataUsed') }} ({{ turn.tools.length }})
+          </button>
+          @if (turn.showData) {
+            <table class="data-table">
+              <tbody>
+                @for (t of turn.tools; track t.tool + t.arguments) {
+                  <tr>
+                    <td class="tool">{{ t.tool }}</td>
+                    <td class="args muted">{{ t.arguments }}</td>
+                    <td class="count">{{ t.resultCount }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        }
+      </div>
+    }
+    @if (thinking()) {
+      <div class="bubble assistant"><p class="text muted">{{ i18n.t('ask.thinking') }}</p></div>
+    }
+  </div>
+
+  <div class="composer card">
+    <input
+      class="input"
+      [placeholder]="i18n.t('ask.placeholder')"
+      [ngModel]="question()"
+      (ngModelChange)="question.set($event)"
+      (keydown.enter)="ask()"
+    />
+    <button class="btn" [disabled]="thinking() || !question().trim()" (click)="ask()">
+      {{ i18n.t('ask.send') }}
+    </button>
+  </div>
+</section>

@@ -1,0 +1,243 @@
+/* ───────────────────────────────────────────────────────────────────────────
+   Masroof — "design-engineered" theme (Bklit-inspired).
+   Near-black canvas, blueprint grid, hairline borders, monospace micro-labels,
+   sharp corners, heavy grotesque display type. Dark-first with a light variant.
+   Token NAMES are stable so component styles adapt automatically.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --font-sans: 'Geist Sans', system-ui, -apple-system, 'Noto Sans Arabic', Tahoma, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* Dark is the primary design. */
+  --bg: #0a0a0b;
+  --surface: #0f1012;
+  --surface-2: #16171a;
+  --border: #26272b;
+  --border-strong: #3a3b40;
+  --text: #ededef;
+  --text-muted: #8c8e94;
+  --text-faint: #5b5d64;
+  --accent: #fafafa; /* primary action = near-white on black */
+  --accent-strong: #ffffff;
+  --accent-ink: #0a0a0b; /* text on accent */
+  --danger: #f87171;
+  --ok: #4ade80;
+
+  --grid: rgba(255, 255, 255, 0.045);
+  --grid-cross: rgba(255, 255, 255, 0.11);
+
+  --radius: 3px;
+  --shadow: none;
+  --cell: 40px;
+}
+
+:root[data-theme='light'] {
+  --bg: #f7f7f8;
+  --surface: #ffffff;
+  --surface-2: #f1f1f3;
+  --border: #e3e3e6;
+  --border-strong: #cfcfd4;
+  --text: #0c0d10;
+  --text-muted: #5c5e66;
+  --text-faint: #9a9ca4;
+  --accent: #0c0d10;
+  --accent-strong: #000000;
+  --accent-ink: #ffffff;
+  --danger: #c62828;
+  --ok: #15803d;
+
+  --grid: rgba(0, 0, 0, 0.05);
+  --grid-cross: rgba(0, 0, 0, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-sans);
+  color: var(--text);
+  margin: 0 0 0.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+h1 {
+  font-size: 1.9rem;
+  font-weight: 800;
+}
+h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+/* ── Blueprint grid backdrop ────────────────────────────────────────────── */
+.grid-bg {
+  position: relative;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: var(--cell) var(--cell);
+  background-position: center top;
+}
+/* crosshair "+" markers at grid intersections */
+.grid-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--grid-cross) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-cross) 1px, transparent 1px);
+  background-size: var(--cell) var(--cell);
+  background-position: center top;
+  -webkit-mask-image:
+    radial-gradient(circle at center, #000 0 1.4px, transparent 1.6px);
+  mask-image: radial-gradient(circle at center, #000 0 1.4px, transparent 1.6px);
+  -webkit-mask-size: var(--cell) var(--cell);
+  mask-size: var(--cell) var(--cell);
+  -webkit-mask-position: center top;
+  mask-position: center top;
+}
+
+/* ── Panels / cards ─────────────────────────────────────────────────────── */
+.card,
+.panel {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.1rem;
+}
+
+/* ── Monospace micro-labels (the engineered annotation look) ────────────── */
+.mono-label {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.66rem;
+  font-weight: 500;
+  color: var(--text-faint);
+}
+.num {
+  font-family: var(--font-mono);
+  font-feature-settings: 'tnum' 1;
+  letter-spacing: -0.01em;
+}
+
+/* ── Buttons ────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, opacity 0.12s ease;
+}
+.btn:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.btn.ghost {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.btn.ghost:hover:not(:disabled) {
+  border-color: var(--text);
+  background: var(--surface-2);
+}
+
+/* ── Inputs ─────────────────────────────────────────────────────────────── */
+.input,
+textarea.input,
+select.input {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-family: var(--font-sans);
+}
+.input::placeholder {
+  color: var(--text-faint);
+}
+.input:focus {
+  outline: none;
+  border-color: var(--text-muted);
+  background: var(--surface);
+}
+select.input {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+/* ── Skeleton loaders ───────────────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    color-mix(in srgb, var(--surface-2) 55%, var(--border)) 37%,
+    var(--surface-2) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.3s ease infinite;
+  border-radius: var(--radius);
+}
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+::selection {
+  background: color-mix(in srgb, var(--text) 85%, transparent);
+  color: var(--bg);
+}

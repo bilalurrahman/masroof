@@ -1,0 +1,23 @@
+## .NET
+bin/
+obj/
+*.user
+artifacts/
+[Dd]ebug/
+[Rr]elease/
+TestResults/
+
+## Rider / VS
+.idea/
+.vs/
+
+## Env & secrets
+deploy/compose/.env
+*.env
+!*.env.example
+
+## Node (frontend, added later)
+node_modules/
+dist/
+.angular/
+npm-debug.log*

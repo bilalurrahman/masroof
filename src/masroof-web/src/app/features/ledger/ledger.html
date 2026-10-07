@@ -1,0 +1,92 @@
+<section class="ledger">
+  <p class="mono-label eyebrow">◆ LEDGER</p>
+  <h1>{{ i18n.t('ledger.heading') }}</h1>
+
+  <div class="filters card">
+    <input
+      class="input"
+      type="month"
+      [ngModel]="month()"
+      (ngModelChange)="month.set($event); applyFilters()"
+      [attr.aria-label]="i18n.t('common.date')"
+    />
+    <select class="input" [ngModel]="category()" (ngModelChange)="category.set($event); applyFilters()">
+      <option value="">{{ i18n.t('ledger.all') }}</option>
+      @for (c of categoriesStore.categories(); track c.code) {
+        <option [value]="c.code">{{ c.name }}</option>
+      }
+    </select>
+    <select class="input" [ngModel]="direction()" (ngModelChange)="direction.set($event); applyFilters()">
+      <option value="">{{ i18n.t('ledger.all') }}</option>
+      <option value="debit">{{ i18n.t('ledger.debit') }}</option>
+      <option value="credit">{{ i18n.t('ledger.credit') }}</option>
+    </select>
+    <input
+      class="input grow"
+      type="search"
+      [placeholder]="i18n.t('ledger.search')"
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)"
+      (keydown.enter)="applyFilters()"
+    />
+    <label class="review-toggle">
+      <input type="checkbox" [ngModel]="needsReview()" (ngModelChange)="needsReview.set($event); applyFilters()" />
+      {{ i18n.t('ledger.needsReview') }}
+    </label>
+  </div>
+
+  @if (loading()) {
+    <div class="rows">
+      @for (i of [1, 2, 3, 4, 5]; track i) {
+        <div class="skeleton row-skel"></div>
+      }
+    </div>
+  } @else if (result(); as r) {
+    @if (r.items.length === 0) {
+      <app-empty-state [message]="i18n.t('ledger.empty')" icon="🔍" />
+    } @else {
+      <div class="rows card">
+        @for (row of r.items; track row.id) {
+          <div class="trow">
+            <div class="tmain">
+              <span class="amount num" [class.credit]="row.direction === 'credit'">
+                {{ row.direction === 'credit' ? '+' : '−' }}{{ row.amount | money: row.currency }}
+              </span>
+              <span class="cp">{{ row.counterparty || '—' }}</span>
+              <span class="muted date">{{ row.txnDate }}</span>
+            </div>
+            <div class="tmeta">
+              <app-confidence-badge [confidence]="row.confidence" />
+              @if (editingId() === row.id) {
+                <select
+                  class="input cat-select"
+                  [ngModel]="row.category.code"
+                  (ngModelChange)="correct(row, $event)"
+                >
+                  @for (c of categoriesStore.categories(); track c.code) {
+                    <option [value]="c.code">{{ c.name }}</option>
+                  }
+                </select>
+              } @else {
+                <button class="chip-btn" (click)="editingId.set(row.id)" [title]="i18n.t('common.category')">
+                  <app-category-chip [name]="row.category.name" [color]="categoriesStore.colorFor(row.category.code)" />
+                </button>
+              }
+              <button class="del" (click)="remove(row)" [attr.aria-label]="i18n.t('common.delete')">✕</button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="pager">
+        <button class="btn ghost" [disabled]="!hasPrev()" (click)="changePage(-1)">
+          {{ i18n.t('ledger.prev') }}
+        </button>
+        <span class="muted">{{ i18n.t('ledger.page') }} {{ r.page }} / {{ r.totalPages || 1 }} · {{ r.total }}</span>
+        <button class="btn ghost" [disabled]="!hasNext()" (click)="changePage(1)">
+          {{ i18n.t('ledger.next') }}
+        </button>
+      </div>
+    }
+  }
+</section>

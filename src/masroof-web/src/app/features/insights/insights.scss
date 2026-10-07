@@ -1,0 +1,52 @@
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.eyebrow {
+  margin: 0 0 0.35rem;
+}
+.stat strong {
+  font-size: 1.7rem;
+  font-weight: 600;
+}
+.debit {
+  color: var(--danger);
+}
+.credit {
+  color: var(--ok);
+}
+.small {
+  font-size: 0.8rem;
+}
+.delta {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.delta.up {
+  color: var(--danger);
+}
+.delta.down {
+  color: var(--ok);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 0.8rem;
+}
+.chart-card h2 {
+  font-size: 0.95rem;
+}
+.chart {
+  width: 100%;
+  height: 300px;
+}
+.tile-skel {
+  height: 320px;
+}

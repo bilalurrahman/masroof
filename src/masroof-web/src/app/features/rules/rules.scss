@@ -1,0 +1,55 @@
+.eyebrow {
+  margin: 0 0 0.35rem;
+}
+.search-row {
+  margin-bottom: 1rem;
+}
+.list {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.rule {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.1rem;
+  border-block-end: 1px solid var(--border);
+}
+.rule:last-child {
+  border-block-end: none;
+}
+.rule-main {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+.subject {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.arrow {
+  color: var(--text-muted);
+}
+.rule-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  white-space: nowrap;
+}
+.embedded {
+  color: var(--accent);
+}
+.btn.small {
+  padding: 0.3rem 0.65rem;
+  font-size: 0.8rem;
+}
+.rule-skel {
+  height: 3rem;
+  margin: 0.3rem 0;
+}
