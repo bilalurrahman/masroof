@@ -16,6 +16,9 @@ deploy/compose/.env
 *.env
 !*.env.example
 
+## Local-only compose overrides (per-machine port remaps, dev bypass, etc.)
+deploy/compose/docker-compose.override.yml
+
 ## Node (frontend, added later)
 node_modules/
 dist/

@@ -12,33 +12,33 @@
   } @else {
     @if (summary(); as s) {
       <div class="stats">
-        <div class="card stat">
+        <div class="card stat" appReveal>
           <span class="mono-label">{{ i18n.t('insights.spent') }}</span>
-          <strong class="debit num">{{ s.totalDebit | money: currency() }}</strong>
+          <strong class="debit num"><span class="cur">{{ currency() }}</span> <span [appCountUp]="s.totalDebit"></span></strong>
           @if (deltaPct() !== null) {
             <span class="delta num" [class.up]="deltaPct()! > 0" [class.down]="deltaPct()! < 0">
               {{ deltaPct()! > 0 ? '▲' : '▼' }} {{ (deltaPct()! | number: '1.0-0') }}% {{ i18n.t('insights.vsLast') }}
             </span>
           }
         </div>
-        <div class="card stat">
+        <div class="card stat" appReveal [revealDelay]="80">
           <span class="mono-label">{{ i18n.t('insights.received') }}</span>
-          <strong class="credit num">{{ s.totalCredit | money: currency() }}</strong>
+          <strong class="credit num"><span class="cur">{{ currency() }}</span> <span [appCountUp]="s.totalCredit"></span></strong>
           <span class="mono-label small">{{ s.transactionCount }} TXN · {{ s.month }}</span>
         </div>
       </div>
 
       <div class="grid">
-        <div class="card chart-card">
+        <div class="card chart-card" appReveal [revealDelay]="160">
           <h2>{{ i18n.t('insights.byCategory') }}</h2>
           @if (donutOption(); as opt) {
-            <div class="chart" appEchart [option]="opt" [theme]="echTheme()"></div>
+            <div class="chart" appEchart [option]="opt"></div>
           }
         </div>
-        <div class="card chart-card">
+        <div class="card chart-card" appReveal [revealDelay]="240">
           <h2>{{ i18n.t('insights.trend') }}</h2>
           @if (trendOption(); as opt) {
-            <div class="chart" appEchart [option]="opt" [theme]="echTheme()"></div>
+            <div class="chart" appEchart [option]="opt"></div>
           }
         </div>
       </div>

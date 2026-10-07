@@ -23,8 +23,8 @@
     <app-empty-state [message]="i18n.t('rules.empty')" icon="🧠" />
   } @else {
     <div class="list card">
-      @for (rule of rules(); track rule.ruleId) {
-        <div class="rule">
+      @for (rule of rules(); track rule.ruleId; let i = $index) {
+        <div class="rule" [appReveal]="i" [revealY]="6">
           <div class="rule-main">
             <span class="subject">{{ rule.subject }}</span>
             <span class="arrow">→</span>
@@ -33,7 +33,7 @@
           <div class="rule-meta">
             <span class="muted">{{ rule.hitCount }} {{ i18n.t('rules.hits') }}</span>
             @if (rule.hasEmbedding) { <span class="embedded" title="Embedded for vector recall">◆</span> }
-            <button class="btn ghost small" (click)="forget(rule)">{{ i18n.t('rules.forget') }}</button>
+            <button appPress class="btn ghost small" (click)="forget(rule)">{{ i18n.t('rules.forget') }}</button>
           </div>
         </div>
       }

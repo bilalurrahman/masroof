@@ -8,12 +8,13 @@ import { ThemeService } from '../../core/theme/theme.service';
 import { MonthlySummary, TrendPoint } from '../../core/models/api-models';
 import { EchartDirective } from '../../shared/charts/echart.directive';
 import { EmptyState } from '../../shared/components/empty-state';
-import { MoneyPipe } from '../../shared/pipes/money.pipe';
+import { RevealDirective } from '../../shared/motion/reveal.directive';
+import { CountUpDirective } from '../../shared/motion/count-up.directive';
 
 @Component({
   selector: 'app-insights',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [EchartDirective, EmptyState, MoneyPipe, DecimalPipe],
+  imports: [EchartDirective, EmptyState, DecimalPipe, RevealDirective, CountUpDirective],
   templateUrl: './insights.html',
   styleUrl: './insights.scss',
 })
@@ -28,7 +29,6 @@ export class Insights implements OnInit {
   protected readonly loading = signal(true);
   protected readonly currency = signal('SAR');
 
-  protected readonly echTheme = computed(() => (this.theme.theme() === 'dark' ? 'dark' : null));
 
   protected readonly deltaPct = computed(() => {
     const s = this.summary();

@@ -3,6 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/api/api.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ToolInvocation } from '../../core/models/api-models';
+import { RevealDirective } from '../../shared/motion/reveal.directive';
+import { PressDirective } from '../../shared/motion/press.directive';
 
 interface ChatTurn {
   id: number;
@@ -15,7 +17,7 @@ interface ChatTurn {
 @Component({
   selector: 'app-ask',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule],
+  imports: [FormsModule, RevealDirective, PressDirective],
   templateUrl: './ask.html',
   styleUrl: './ask.scss',
 })

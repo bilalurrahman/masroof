@@ -150,6 +150,25 @@ a {
   font-feature-settings: 'tnum' 1;
   letter-spacing: -0.01em;
 }
+/* Currency code prefix beside an animated numeral. */
+.num .cur {
+  font-size: 0.68em;
+  color: var(--text-faint);
+  letter-spacing: 0.04em;
+  margin-inline-end: 0.15em;
+}
+
+/* Reveal targets start hidden so there is no flash before Motion runs;
+   if JS/Motion never runs, a short fallback makes them visible anyway. */
+@media (prefers-reduced-motion: no-preference) {
+  [appReveal] {
+    opacity: 0;
+    animation: reveal-fallback 0s linear 1.2s forwards;
+  }
+}
+@keyframes reveal-fallback {
+  to { opacity: 1; }
+}
 
 /* ── Buttons ────────────────────────────────────────────────────────────── */
 .btn {

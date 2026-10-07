@@ -9,11 +9,21 @@ import { CategoryChip } from '../../shared/components/category-chip';
 import { ConfidenceBadge } from '../../shared/components/confidence-badge';
 import { EmptyState } from '../../shared/components/empty-state';
 import { MoneyPipe } from '../../shared/pipes/money.pipe';
+import { RevealDirective } from '../../shared/motion/reveal.directive';
+import { PressDirective } from '../../shared/motion/press.directive';
 
 @Component({
   selector: 'app-ledger',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, CategoryChip, ConfidenceBadge, EmptyState, MoneyPipe],
+  imports: [
+    FormsModule,
+    CategoryChip,
+    ConfidenceBadge,
+    EmptyState,
+    MoneyPipe,
+    RevealDirective,
+    PressDirective,
+  ],
   templateUrl: './ledger.html',
   styleUrl: './ledger.scss',
 })

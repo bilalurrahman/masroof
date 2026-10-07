@@ -8,11 +8,22 @@ import { ParseResponse } from '../../core/models/api-models';
 import { CategoryChip } from '../../shared/components/category-chip';
 import { ConfidenceBadge } from '../../shared/components/confidence-badge';
 import { MoneyPipe } from '../../shared/pipes/money.pipe';
+import { RevealDirective } from '../../shared/motion/reveal.directive';
+import { PressDirective } from '../../shared/motion/press.directive';
+import { CountUpDirective } from '../../shared/motion/count-up.directive';
 
 @Component({
   selector: 'app-capture',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, CategoryChip, ConfidenceBadge, MoneyPipe],
+  imports: [
+    FormsModule,
+    CategoryChip,
+    ConfidenceBadge,
+    MoneyPipe,
+    RevealDirective,
+    PressDirective,
+    CountUpDirective,
+  ],
   templateUrl: './capture.html',
   styleUrl: './capture.scss',
 })

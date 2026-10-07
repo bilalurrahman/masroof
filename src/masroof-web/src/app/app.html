@@ -8,32 +8,32 @@
 
     <nav class="nav">
       @for (item of nav; track item.path) {
-        <a [routerLink]="item.path" routerLinkActive="active" class="nav-link mono-label">
+        <a appPress [routerLink]="item.path" routerLinkActive="active" class="nav-link mono-label">
           {{ i18n.t(item.key) }}
         </a>
       }
     </nav>
 
     <div class="actions">
-      <button type="button" class="icon-btn mono-label" (click)="i18n.toggle()" [attr.aria-label]="i18n.t('common.language')">
+      <button appPress type="button" class="icon-btn mono-label" (click)="i18n.toggle()" [attr.aria-label]="i18n.t('common.language')">
         {{ i18n.t('common.language') }}
       </button>
-      <button type="button" class="icon-btn" (click)="theme.toggle()" [attr.aria-label]="i18n.t('common.theme')">
+      <button appPress type="button" class="icon-btn" (click)="theme.toggle()" [attr.aria-label]="i18n.t('common.theme')">
         {{ theme.theme() === 'dark' ? '◐' : '◑' }}
       </button>
       @if (auth.authEnabled) {
         @if (auth.isAuthenticated()) {
           <span class="user mono-label" title="{{ auth.userName() }}">{{ auth.userName() || 'USER' }}</span>
-          <button type="button" class="icon-btn mono-label" (click)="auth.logout()">{{ i18n.t('auth.logout') }}</button>
+          <button appPress type="button" class="icon-btn mono-label" (click)="auth.logout()">{{ i18n.t('auth.logout') }}</button>
         } @else {
-          <button type="button" class="icon-btn mono-label" (click)="auth.login()">{{ i18n.t('auth.login') }}</button>
+          <button appPress type="button" class="icon-btn mono-label" (click)="auth.login()">{{ i18n.t('auth.login') }}</button>
         }
       }
     </div>
   </header>
 
   <main class="content grid-bg">
-    <div class="page">
+    <div class="page" appPageTransition>
       <router-outlet />
     </div>
   </main>

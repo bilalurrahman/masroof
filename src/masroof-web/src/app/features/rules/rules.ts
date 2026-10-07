@@ -7,11 +7,13 @@ import { ToastService } from '../../core/ui/toast.service';
 import { RuleDto } from '../../core/models/api-models';
 import { CategoryChip } from '../../shared/components/category-chip';
 import { EmptyState } from '../../shared/components/empty-state';
+import { RevealDirective } from '../../shared/motion/reveal.directive';
+import { PressDirective } from '../../shared/motion/press.directive';
 
 @Component({
   selector: 'app-rules',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, CategoryChip, EmptyState],
+  imports: [FormsModule, CategoryChip, EmptyState, RevealDirective, PressDirective],
   templateUrl: './rules.html',
   styleUrl: './rules.scss',
 })

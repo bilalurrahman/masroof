@@ -5,15 +5,15 @@
   @if (turns().length === 0) {
     <div class="suggestions card">
       <p class="muted">{{ i18n.t('ask.suggestions') }}</p>
-      @for (s of suggestions; track s) {
-        <button class="suggest" (click)="ask(s)">{{ s }}</button>
+      @for (s of suggestions; track s; let i = $index) {
+        <button appPress class="suggest" [appReveal]="i" (click)="ask(s)">{{ s }}</button>
       }
     </div>
   }
 
   <div class="thread">
     @for (turn of turns(); track turn.id) {
-      <div class="bubble" [class.user]="turn.role === 'user'" [class.assistant]="turn.role === 'assistant'">
+      <div class="bubble" appReveal [revealY]="8" [class.user]="turn.role === 'user'" [class.assistant]="turn.role === 'assistant'">
         <p class="text">{{ turn.text }}</p>
         @if (turn.role === 'assistant' && turn.tools && turn.tools.length) {
           <button class="data-toggle" (click)="toggleData(turn)">
@@ -48,7 +48,7 @@
       (ngModelChange)="question.set($event)"
       (keydown.enter)="ask()"
     />
-    <button class="btn" [disabled]="thinking() || !question().trim()" (click)="ask()">
+    <button appPress class="btn" [disabled]="thinking() || !question().trim()" (click)="ask()">
       {{ i18n.t('ask.send') }}
     </button>
   </div>

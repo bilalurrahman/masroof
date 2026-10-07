@@ -4,11 +4,20 @@ import { AuthService } from './core/auth/auth.service';
 import { I18nService } from './core/i18n/i18n.service';
 import { ThemeService } from './core/theme/theme.service';
 import { ToastHost } from './shared/components/toast-host';
+import { PageTransitionDirective } from './shared/motion/page-transition.directive';
+import { PressDirective } from './shared/motion/press.directive';
 
 @Component({
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastHost],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    ToastHost,
+    PageTransitionDirective,
+    PressDirective,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

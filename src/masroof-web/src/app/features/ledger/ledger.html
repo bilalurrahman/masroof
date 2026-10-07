@@ -46,8 +46,8 @@
       <app-empty-state [message]="i18n.t('ledger.empty')" icon="🔍" />
     } @else {
       <div class="rows card">
-        @for (row of r.items; track row.id) {
-          <div class="trow">
+        @for (row of r.items; track row.id; let i = $index) {
+          <div class="trow" [appReveal]="i" [revealY]="6">
             <div class="tmain">
               <span class="amount num" [class.credit]="row.direction === 'credit'">
                 {{ row.direction === 'credit' ? '+' : '−' }}{{ row.amount | money: row.currency }}
@@ -68,22 +68,22 @@
                   }
                 </select>
               } @else {
-                <button class="chip-btn" (click)="editingId.set(row.id)" [title]="i18n.t('common.category')">
+                <button appPress class="chip-btn" (click)="editingId.set(row.id)" [title]="i18n.t('common.category')">
                   <app-category-chip [name]="row.category.name" [color]="categoriesStore.colorFor(row.category.code)" />
                 </button>
               }
-              <button class="del" (click)="remove(row)" [attr.aria-label]="i18n.t('common.delete')">✕</button>
+              <button appPress class="del" (click)="remove(row)" [attr.aria-label]="i18n.t('common.delete')">✕</button>
             </div>
           </div>
         }
       </div>
 
       <div class="pager">
-        <button class="btn ghost" [disabled]="!hasPrev()" (click)="changePage(-1)">
+        <button appPress class="btn ghost" [disabled]="!hasPrev()" (click)="changePage(-1)">
           {{ i18n.t('ledger.prev') }}
         </button>
         <span class="muted">{{ i18n.t('ledger.page') }} {{ r.page }} / {{ r.totalPages || 1 }} · {{ r.total }}</span>
-        <button class="btn ghost" [disabled]="!hasNext()" (click)="changePage(1)">
+        <button appPress class="btn ghost" [disabled]="!hasNext()" (click)="changePage(1)">
           {{ i18n.t('ledger.next') }}
         </button>
       </div>

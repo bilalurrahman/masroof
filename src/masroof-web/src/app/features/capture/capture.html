@@ -8,7 +8,7 @@
       @if (monthTotal() !== null) {
         <div class="month-total">
           <span class="mono-label">{{ i18n.t('capture.monthTotal') }}</span>
-          <strong class="num">{{ monthTotal() | money: currency() }}</strong>
+          <strong class="num"><span class="cur">{{ currency() }}</span> <span [appCountUp]="monthTotal()"></span></strong>
         </div>
       }
     </div>
@@ -27,7 +27,7 @@
         <input type="checkbox" [ngModel]="batch()" (ngModelChange)="batch.set($event)" />
         {{ i18n.t('capture.batch') }}
       </label>
-      <button class="btn" [disabled]="parsing() || !text().trim()" (click)="submit()">
+      <button appPress class="btn" [disabled]="parsing() || !text().trim()" (click)="submit()">
         {{ parsing() ? i18n.t('capture.parsing') : i18n.t('capture.parse') }}
       </button>
     </div>
@@ -36,8 +36,8 @@
   @if (recent().length) {
     <h2 class="section-title mono-label">{{ i18n.t('capture.recent') }}</h2>
     <div class="recent-list">
-      @for (row of recent(); track row.id) {
-        <div class="card recent-row">
+      @for (row of recent(); track row.id; let i = $index) {
+        <div class="card recent-row" [appReveal]="i">
           <div class="row-main">
             <div class="row-top">
               <span class="amount num" [class.credit]="row.direction === 'credit'">
