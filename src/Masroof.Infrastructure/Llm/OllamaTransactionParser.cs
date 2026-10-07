@@ -8,6 +8,7 @@ using Masroof.Application.Common;
 using Masroof.Domain.Taxonomy;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Polly.Timeout;
 
 namespace Masroof.Infrastructure.Llm;
 
@@ -78,6 +79,12 @@ public sealed class OllamaTransactionParser(
             sw.Stop();
             logger.LogWarning(ex, "Failed to bind Ollama output.");
             return Failed(model, (int)sw.ElapsedMilliseconds, rawContent, ex.Message);
+        }
+        catch (TimeoutRejectedException ex)
+        {
+            // Polly's resilience timeout (per-attempt or total) — treat as the LLM being slow/down
+            // so the parse pipeline can fall back to a pre-parsed pending row instead of 500-ing.
+            throw new LlmUnavailableException("The LLM request timed out.", ex);
         }
         catch (OperationCanceledException) when (!ct.IsCancellationRequested)
         {

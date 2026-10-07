@@ -106,7 +106,10 @@ public sealed class TransactionConfiguration : IEntityTypeConfiguration<Transact
             .IncludeProperties(x => new { x.Amount, x.Direction, x.CategoryId });
 
         b.HasOne(x => x.User).WithMany(u => u.Transactions).HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
-        b.HasOne(x => x.Account).WithMany().HasForeignKey(x => x.AccountId).OnDelete(DeleteBehavior.SetNull);
+        // ClientSetNull (DB: NO ACTION) — avoids a second cascade path into Transactions
+        // (User→Accounts→Transactions alongside User→Transactions), which SQL Server rejects.
+        // AccountId is optional, so EF still nulls it on tracked entities when an Account is removed.
+        b.HasOne(x => x.Account).WithMany().HasForeignKey(x => x.AccountId).OnDelete(DeleteBehavior.ClientSetNull);
         b.HasOne(x => x.Category).WithMany().HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.Restrict);
     }
 }

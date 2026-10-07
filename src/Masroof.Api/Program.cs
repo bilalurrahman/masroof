@@ -95,11 +95,14 @@ app.UseStatusCodePages();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    if (config.GetValue("Database:AutoMigrate", false))
-    {
-        using var scope = app.Services.CreateScope();
-        await scope.ServiceProvider.GetRequiredService<MasroofDbContext>().Database.MigrateAsync();
-    }
+}
+
+// Apply EF migrations on startup when configured (controlled by config, not
+// environment) so the Dockerised Production stack can self-provision its schema.
+if (config.GetValue("Database:AutoMigrate", false))
+{
+    using var scope = app.Services.CreateScope();
+    await scope.ServiceProvider.GetRequiredService<MasroofDbContext>().Database.MigrateAsync();
 }
 
 app.UseCors("spa");

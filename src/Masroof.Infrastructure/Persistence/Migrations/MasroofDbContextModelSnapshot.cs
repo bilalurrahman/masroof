@@ -631,7 +631,7 @@ namespace Masroof.Infrastructure.Persistence.Migrations
                     b.HasOne("Masroof.Domain.Entities.Account", "Account")
                         .WithMany()
                         .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.ClientSetNull);
 
                     b.HasOne("Masroof.Domain.Entities.Category", "Category")
                         .WithMany()

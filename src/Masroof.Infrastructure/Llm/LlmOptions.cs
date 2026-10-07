@@ -20,8 +20,9 @@ public sealed class LlmOptions
     /// <summary>bge-m3 produces 1024-dim vectors.</summary>
     public int EmbeddingDimensions { get; set; } = 1024;
 
-    /// <summary>Per-request timeout in seconds.</summary>
-    public int TimeoutSeconds { get; set; } = 20;
+    /// <summary>Per-attempt timeout in seconds. Generous enough to absorb a cold model load
+    /// (the first call after startup loads the model into VRAM), which can take ~20-40s.</summary>
+    public int TimeoutSeconds { get; set; } = 60;
 
     /// <summary>Max concurrent LLM calls, to match GPU capacity.</summary>
     public int MaxConcurrency { get; set; } = 4;

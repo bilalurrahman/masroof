@@ -20,6 +20,11 @@ public sealed class OutboxProcessor(IServiceScopeFactory scopeFactory, ILogger<O
     private const int BatchSize = 20;
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(5);
 
+    // Payloads are written by the API with camelCase property names (anonymous objects),
+    // so deserialize case-insensitively — otherwise fields bind to their defaults
+    // (e.g. ruleId → 0, userId → Guid.Empty) and jobs silently no-op.
+    private static readonly JsonSerializerOptions JsonOpts = new(JsonSerializerDefaults.Web);
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("Outbox processor started.");
@@ -103,7 +108,7 @@ public sealed class OutboxProcessor(IServiceScopeFactory scopeFactory, ILogger<O
 
     private static async Task HandleEmbedRuleAsync(IServiceProvider sp, string payloadJson, CancellationToken ct)
     {
-        var ruleId = JsonSerializer.Deserialize<EmbedRulePayload>(payloadJson)?.RuleId
+        var ruleId = JsonSerializer.Deserialize<EmbedRulePayload>(payloadJson, JsonOpts)?.RuleId
                      ?? throw new InvalidOperationException("EmbedRule payload missing ruleId.");
 
         var db = sp.GetRequiredService<MasroofDbContext>();
@@ -121,7 +126,7 @@ public sealed class OutboxProcessor(IServiceScopeFactory scopeFactory, ILogger<O
 
     private async Task HandleReparseBatchAsync(IServiceProvider sp, string payloadJson, CancellationToken ct)
     {
-        var payload = JsonSerializer.Deserialize<ReparseBatchPayload>(payloadJson)
+        var payload = JsonSerializer.Deserialize<ReparseBatchPayload>(payloadJson, JsonOpts)
                       ?? throw new InvalidOperationException("ReparseBatch payload invalid.");
 
         await SetUserAsync(sp, payload.UserId, ct);
@@ -148,7 +153,7 @@ public sealed class OutboxProcessor(IServiceScopeFactory scopeFactory, ILogger<O
 
     private async Task HandleReparsePendingAsync(IServiceProvider sp, string payloadJson, CancellationToken ct)
     {
-        var userId = JsonSerializer.Deserialize<ReparsePendingPayload>(payloadJson)?.UserId
+        var userId = JsonSerializer.Deserialize<ReparsePendingPayload>(payloadJson, JsonOpts)?.UserId
                      ?? throw new InvalidOperationException("ReparsePending payload missing userId.");
 
         await SetUserAsync(sp, userId, ct);
