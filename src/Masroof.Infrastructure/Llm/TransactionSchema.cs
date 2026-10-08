@@ -45,7 +45,14 @@ public static class TransactionSchema
                     ["maximum"] = 1
                 }
             },
-            ["required"] = new JsonArray { "direction", "amount", "currency", "category", "confidence" }
+            // All fields are required so Ollama's constrained decoding always emits them;
+            // the optional ones are nullable types, so the model outputs a value or null
+            // rather than silently omitting the key (which left counterparty/date blank).
+            ["required"] = new JsonArray
+            {
+                "direction", "amount", "currency", "counterparty", "channel",
+                "accountLast4", "date", "category", "confidence"
+            }
         };
     }
 }
