@@ -7,7 +7,8 @@ public sealed record CategorySeedItem(
     string NameEn,
     string NameAr,
     string Icon,
-    string Color);
+    string Color,
+    bool ExcludeFromTotals = false);
 
 /// <summary>
 /// Canonical seed data for <c>dbo.Categories</c>. CategoryIds are fixed and must never
@@ -37,6 +38,7 @@ public static class CategorySeed
         new(18, CategoryCodes.Investment,     "Investment",       "استثمار",          "trending_up",    "#2E7D32"),
         new(19, CategoryCodes.Government,     "Government",       "حكومي",            "account_balance","#546E7A"),
         new(20, CategoryCodes.Other,          "Other",            "أخرى",             "category",       "#90A4AE"),
+        new(21, CategoryCodes.TransferInternal, "Internal Transfer", "تحويل داخلي",   "swap_horiz",     "#78909C", ExcludeFromTotals: true),
     ];
 
     public static short IdFor(string code) =>

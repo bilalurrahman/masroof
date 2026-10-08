@@ -33,5 +33,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/rules/rules').then((m) => m.Rules),
     title: 'Masroof · Rules',
   },
+  {
+    path: 'accounts',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/accounts/accounts').then((m) => m.Accounts),
+    title: 'Masroof · Accounts',
+  },
   { path: '**', redirectTo: 'capture' },
 ];

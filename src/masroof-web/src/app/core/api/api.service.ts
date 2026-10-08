@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
+  AccountDto,
   AskResponse,
   CategoryDto,
   JobAccepted,
@@ -14,6 +15,7 @@ import {
   RuleDto,
   TransactionDto,
   TrendPoint,
+  UpsertAccountRequest,
 } from '../models/api-models';
 
 /** Typed client for the Masroof API. One method per endpoint in the contract. */
@@ -78,5 +80,17 @@ export class ApiService {
 
   getCategories(): Observable<CategoryDto[]> {
     return this.http.get<CategoryDto[]>(`${this.base}/categories`);
+  }
+
+  getAccounts(): Observable<AccountDto[]> {
+    return this.http.get<AccountDto[]>(`${this.base}/accounts`);
+  }
+
+  createAccount(body: UpsertAccountRequest): Observable<AccountDto> {
+    return this.http.post<AccountDto>(`${this.base}/accounts`, body);
+  }
+
+  updateAccount(id: number, body: UpsertAccountRequest): Observable<AccountDto> {
+    return this.http.patch<AccountDto>(`${this.base}/accounts/${id}`, body);
   }
 }

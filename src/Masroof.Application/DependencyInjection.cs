@@ -3,6 +3,7 @@ using Masroof.Application.Transactions.CorrectCategory;
 using Masroof.Application.Transactions.DeleteTransaction;
 using Masroof.Application.Transactions.GetLedger;
 using Masroof.Application.Transactions.ParseTransaction;
+using Masroof.Application.Accounts;
 using Masroof.Application.Categories;
 using Masroof.Application.Rules;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +22,9 @@ public static class DependencyInjection
         services.AddScoped<ListRulesHandler>();
         services.AddScoped<DeleteRuleHandler>();
         services.AddScoped<GetCategoriesHandler>();
+        services.AddScoped<ListAccountsHandler>();
+        services.AddScoped<CreateAccountHandler>();
+        services.AddScoped<UpdateAccountHandler>();
 
         services.AddScoped<IValidator<ParseTransactionCommand>, ParseTransactionCommandValidator>();
         services.AddScoped<IValidator<PatchTransactionCommand>, PatchTransactionCommandValidator>();

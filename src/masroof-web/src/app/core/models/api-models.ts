@@ -102,6 +102,24 @@ export interface JobAccepted {
   count: number;
 }
 
+export interface AccountDto {
+  accountId: number;
+  bankCode: string | null;
+  last4: string | null;
+  nickname: string | null;
+  ibanTail: string | null;
+  isOwn: boolean;
+  transactionCount: number;
+}
+
+export interface UpsertAccountRequest {
+  bankCode?: string | null;
+  last4?: string | null;
+  nickname?: string | null;
+  ibanTail?: string | null;
+  isOwn: boolean;
+}
+
 export interface PatchTransactionRequest {
   categoryCode?: string | null;
   amount?: number | null;

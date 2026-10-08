@@ -124,6 +124,7 @@ api.MapReportEndpoints();
 api.MapAskEndpoints();
 api.MapRuleEndpoints();
 api.MapCategoryEndpoints();
+api.MapAccountEndpoints();
 
 app.Run();
 

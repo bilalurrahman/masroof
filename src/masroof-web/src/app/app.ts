@@ -32,5 +32,6 @@ export class App {
     { path: '/insights', key: 'nav.insights', icon: '📊' },
     { path: '/ask', key: 'nav.ask', icon: '💬' },
     { path: '/rules', key: 'nav.rules', icon: '🧠' },
+    { path: '/accounts', key: 'nav.accounts', icon: '🏦' },
   ];
 }

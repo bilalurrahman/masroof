@@ -1,0 +1,70 @@
+.eyebrow {
+  margin: 0 0 0.35rem;
+}
+.intro {
+  margin: 0 0 1.25rem;
+  max-width: 60ch;
+}
+.list {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.acct {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.9rem 1.25rem;
+  padding: 0.85rem 1.1rem;
+  border-block-end: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.acct:last-child {
+  border-block-end: none;
+}
+.acct.own {
+  border-inline-start: 2px solid var(--accent);
+}
+.acct-id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 8rem;
+  flex: 1 1 auto;
+}
+.field .input {
+  inline-size: 11rem;
+  max-inline-size: 40vw;
+}
+.bank {
+  font-weight: 600;
+}
+.small {
+  font-size: 0.78rem;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.field .mono-label,
+.mine .mono-label {
+  font-size: 0.68rem;
+}
+.field.narrow .input {
+  inline-size: 5rem;
+  text-align: center;
+  letter-spacing: 0.15em;
+}
+.mine {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding-block-end: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+.acct-skel {
+  height: 3.5rem;
+  margin: 0.3rem 0;
+}

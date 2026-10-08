@@ -25,18 +25,22 @@ public sealed class ReportQueries(ISqlConnectionFactory factory, ICurrentUser cu
         var totals = await conn.QuerySingleAsync<(decimal Debit, decimal Credit, int Cnt)>(new CommandDefinition(
             """
             SELECT
-              COALESCE(SUM(CASE WHEN Direction='debit'  THEN Amount END),0) AS Debit,
-              COALESCE(SUM(CASE WHEN Direction='credit' THEN Amount END),0) AS Credit,
+              COALESCE(SUM(CASE WHEN t.Direction='debit'  THEN t.Amount END),0) AS Debit,
+              COALESCE(SUM(CASE WHEN t.Direction='credit' THEN t.Amount END),0) AS Credit,
               COUNT(*) AS Cnt
-            FROM dbo.Transactions
-            WHERE UserId=@userId AND IsDeleted=0 AND TxnDate>=@from AND TxnDate<@to;
+            FROM dbo.Transactions t
+            JOIN dbo.Categories c ON c.CategoryId = t.CategoryId
+            WHERE t.UserId=@userId AND t.IsDeleted=0 AND c.ExcludeFromTotals=0
+                  AND t.TxnDate>=@from AND t.TxnDate<@to;
             """, new { userId, from, to }, cancellationToken: ct));
 
         var prevDebit = await conn.ExecuteScalarAsync<decimal?>(new CommandDefinition(
             """
-            SELECT COALESCE(SUM(CASE WHEN Direction='debit' THEN Amount END),0)
-            FROM dbo.Transactions
-            WHERE UserId=@userId AND IsDeleted=0 AND TxnDate>=@prevFrom AND TxnDate<@from;
+            SELECT COALESCE(SUM(CASE WHEN t.Direction='debit' THEN t.Amount END),0)
+            FROM dbo.Transactions t
+            JOIN dbo.Categories c ON c.CategoryId = t.CategoryId
+            WHERE t.UserId=@userId AND t.IsDeleted=0 AND c.ExcludeFromTotals=0
+                  AND t.TxnDate>=@prevFrom AND t.TxnDate<@from;
             """, new { userId, prevFrom, from }, cancellationToken: ct)) ?? 0m;
 
         var byCategory = await GetSpendByCategoryAsync(userId, year, month, ct);
@@ -59,12 +63,13 @@ public sealed class ReportQueries(ISqlConnectionFactory factory, ICurrentUser cu
         await using var conn = await factory.OpenAsync(ct);
         var rows = await conn.QueryAsync<(string Month, decimal Debit, decimal Credit)>(new CommandDefinition(
             """
-            SELECT FORMAT(TxnDate,'yyyy-MM') AS Month,
-                   COALESCE(SUM(CASE WHEN Direction='debit'  THEN Amount END),0) AS Debit,
-                   COALESCE(SUM(CASE WHEN Direction='credit' THEN Amount END),0) AS Credit
-            FROM dbo.Transactions
-            WHERE UserId=@userId AND IsDeleted=0 AND TxnDate>=@start
-            GROUP BY FORMAT(TxnDate,'yyyy-MM')
+            SELECT FORMAT(t.TxnDate,'yyyy-MM') AS Month,
+                   COALESCE(SUM(CASE WHEN t.Direction='debit'  THEN t.Amount END),0) AS Debit,
+                   COALESCE(SUM(CASE WHEN t.Direction='credit' THEN t.Amount END),0) AS Credit
+            FROM dbo.Transactions t
+            JOIN dbo.Categories c ON c.CategoryId = t.CategoryId
+            WHERE t.UserId=@userId AND t.IsDeleted=0 AND c.ExcludeFromTotals=0 AND t.TxnDate>=@start
+            GROUP BY FORMAT(t.TxnDate,'yyyy-MM')
             ORDER BY Month;
             """, new { userId, start }, cancellationToken: ct));
 
@@ -82,7 +87,7 @@ public sealed class ReportQueries(ISqlConnectionFactory factory, ICurrentUser cu
             SELECT c.Code, c.NameEn, c.NameAr, SUM(t.Amount) AS Total, COUNT(*) AS Cnt
             FROM dbo.Transactions t
             JOIN dbo.Categories c ON c.CategoryId = t.CategoryId
-            WHERE t.UserId=@userId AND t.IsDeleted=0 AND t.Direction='debit'
+            WHERE t.UserId=@userId AND t.IsDeleted=0 AND t.Direction='debit' AND c.ExcludeFromTotals=0
                   AND t.TxnDate>=@from AND t.TxnDate<@to
             GROUP BY c.Code, c.NameEn, c.NameAr
             ORDER BY Total DESC;
@@ -97,12 +102,13 @@ public sealed class ReportQueries(ISqlConnectionFactory factory, ICurrentUser cu
         await using var conn = await factory.OpenAsync(ct);
         var rows = await conn.QueryAsync<(string Counterparty, decimal Total, int Cnt)>(new CommandDefinition(
             """
-            SELECT TOP (@top) COALESCE(Counterparty,'(unknown)') AS Counterparty,
-                   SUM(Amount) AS Total, COUNT(*) AS Cnt
-            FROM dbo.Transactions
-            WHERE UserId=@userId AND IsDeleted=0 AND Direction='debit'
-                  AND TxnDate>=@from AND TxnDate<=@to
-            GROUP BY COALESCE(Counterparty,'(unknown)')
+            SELECT TOP (@top) COALESCE(t.Counterparty,'(unknown)') AS Counterparty,
+                   SUM(t.Amount) AS Total, COUNT(*) AS Cnt
+            FROM dbo.Transactions t
+            JOIN dbo.Categories c ON c.CategoryId = t.CategoryId
+            WHERE t.UserId=@userId AND t.IsDeleted=0 AND t.Direction='debit' AND c.ExcludeFromTotals=0
+                  AND t.TxnDate>=@from AND t.TxnDate<=@to
+            GROUP BY COALESCE(t.Counterparty,'(unknown)')
             ORDER BY Total DESC;
             """, new { userId, from, to, top }, cancellationToken: ct));
 

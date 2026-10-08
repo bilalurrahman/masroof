@@ -111,11 +111,23 @@ public sealed class ParseTransactionHandler(
         var last4 = Coalesce(pre?.Last4, parsed?.AccountLast4);
         var txnDate = pre?.Date ?? parsed?.Date ?? clock.Today;
 
-        // Category: LLM suggestion, then rule post-override (rules beat the model).
-        var categoryCode = CategoryCodes.ResolveOrOther(exact?.CategoryCode ?? parsed?.Category);
+        // Category precedence: an explicit learned rule wins; otherwise, if this looks like a
+        // transfer whose other side is one of the user's own accounts, it is internal movement
+        // (not spending); otherwise fall back to the LLM's suggestion.
+        var internalTransfer = exact is null
+            && channel == TransactionChannel.Transfer
+            && await MatchesOwnAccountAsync(userId, normalized, counterparty, ct);
+
+        var categoryCode = exact is not null
+            ? CategoryCodes.ResolveOrOther(exact.CategoryCode)
+            : internalTransfer
+                ? CategoryCodes.TransferInternal
+                : CategoryCodes.ResolveOrOther(parsed?.Category);
         var confidence = exact is not null
             ? 1.0
-            : (parsed?.Confidence ?? pre?.Confidence ?? 0.0);
+            : internalTransfer
+                ? 0.9
+                : (parsed?.Confidence ?? pre?.Confidence ?? 0.0);
 
         ValidateBusinessRules(amount, currency, txnDate);
 
@@ -214,6 +226,42 @@ public sealed class ParseTransactionHandler(
             throw new UnparseableLlmOutputException($"Currency '{currency}' is not allowed.");
         if (txnDate > DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)))
             throw new UnparseableLlmOutputException("Transaction date is too far in the future.");
+    }
+
+    /// <summary>
+    /// Best-effort internal-transfer detection: true when the transfer's other party matches one
+    /// of the user's own accounts — by a destination IBAN tail present in the message, or by the
+    /// counterparty matching an own account's nickname. Deliberately matches the counterparty /
+    /// IBAN tail (the *other* side) rather than any 4-digit token, so a remittance sent *from* an
+    /// own card is not misread as internal. Misses are caught by the learning loop (correct once →
+    /// rule), so this stays conservative to avoid false positives.
+    /// </summary>
+    private async Task<bool> MatchesOwnAccountAsync(Guid userId, string normalized, string? counterparty, CancellationToken ct)
+    {
+        var own = await db.Accounts
+            .Where(a => a.UserId == userId && a.IsOwn)
+            .Select(a => new { a.Nickname, a.IbanTail })
+            .ToListAsync(ct);
+        if (own.Count == 0)
+            return false;
+
+        var cpNorm = counterparty is null ? null : TextNormalizer.NormalizeSubject(counterparty);
+
+        foreach (var a in own)
+        {
+            if (!string.IsNullOrWhiteSpace(a.IbanTail)
+                && System.Text.RegularExpressions.Regex.IsMatch(normalized, $@"(?<!\d){a.IbanTail}(?!\d)"))
+                return true;
+
+            if (!string.IsNullOrWhiteSpace(a.Nickname) && cpNorm is { Length: > 0 })
+            {
+                var nick = TextNormalizer.NormalizeSubject(a.Nickname);
+                if (nick.Length >= 3 && (cpNorm.Contains(nick, StringComparison.OrdinalIgnoreCase)
+                                         || nick.Contains(cpNorm, StringComparison.OrdinalIgnoreCase)))
+                    return true;
+            }
+        }
+        return false;
     }
 
     private async Task<int?> ResolveAccountAsync(Guid userId, string? bankCode, string? last4, CancellationToken ct)

@@ -1,0 +1,53 @@
+<section class="accounts">
+  <p class="mono-label eyebrow">◆ ACCOUNTS</p>
+  <h1>{{ i18n.t('accounts.heading') }}</h1>
+  <p class="intro muted">{{ i18n.t('accounts.intro') }}</p>
+
+  @if (loading()) {
+    <div class="list">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="skeleton acct-skel"></div>
+      }
+    </div>
+  } @else if (accounts().length === 0) {
+    <app-empty-state [message]="i18n.t('accounts.empty')" icon="🏦" />
+  } @else {
+    <div class="list card">
+      @for (a of accounts(); track a.accountId; let i = $index) {
+        <div class="acct" [appReveal]="i" [revealY]="6" [class.own]="a.isOwn">
+          <div class="acct-id">
+            <span class="bank num">{{ label(a) }}</span>
+            <span class="muted small">{{ a.transactionCount }} {{ i18n.t('accounts.txns') }}</span>
+          </div>
+
+          <label class="field">
+            <span class="mono-label">{{ i18n.t('accounts.nickname') }}</span>
+            <input
+              class="input"
+              [placeholder]="i18n.t('accounts.nicknamePh')"
+              [(ngModel)]="a.nickname"
+              (blur)="save(a)"
+            />
+          </label>
+
+          <label class="field narrow">
+            <span class="mono-label">{{ i18n.t('accounts.ibanTail') }}</span>
+            <input
+              class="input num"
+              inputmode="numeric"
+              maxlength="4"
+              placeholder="····"
+              [(ngModel)]="a.ibanTail"
+              (blur)="save(a)"
+            />
+          </label>
+
+          <label class="mine" [title]="i18n.t('accounts.mine')">
+            <input type="checkbox" [(ngModel)]="a.isOwn" (ngModelChange)="save(a)" />
+            <span class="mono-label">{{ i18n.t('accounts.mine') }}</span>
+          </label>
+        </div>
+      }
+    </div>
+  }
+</section>

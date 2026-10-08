@@ -30,6 +30,7 @@ public static class CategoryGuidance
             [CategoryCodes.AtmCash] = "ATM withdrawals & cash (سحب نقدي, صراف آلي, ATM withdrawal)",
             [CategoryCodes.Investment] = "brokerage, stocks, funds & crypto (تداول, استثمار, صندوق, أسهم)",
             [CategoryCodes.Government] = "government services, fines & traffic violations (Absher, Sadad government, Muqeem, مخالفات, رسوم حكومية)",
+            [CategoryCodes.TransferInternal] = "moving money between the user's OWN accounts (e.g. salary account → budget account, card top-up from own account); not spending. NOT remittances to other people (that is family_transfer)",
             [CategoryCodes.Other] = "anything that does not clearly fit another category",
         };
 

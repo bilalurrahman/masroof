@@ -33,6 +33,7 @@ public sealed class CategoryConfiguration : IEntityTypeConfiguration<Category>
         b.Property(x => x.NameAr).HasMaxLength(60).IsRequired();
         b.Property(x => x.Icon).HasColumnType("varchar(40)");
         b.Property(x => x.Color).HasColumnType("char(7)");
+        b.Property(x => x.ExcludeFromTotals).HasDefaultValue(false);
 
         b.HasData(CategorySeed.Items.Select(i => new Category
         {
@@ -41,7 +42,8 @@ public sealed class CategoryConfiguration : IEntityTypeConfiguration<Category>
             NameEn = i.NameEn,
             NameAr = i.NameAr,
             Icon = i.Icon,
-            Color = i.Color
+            Color = i.Color,
+            ExcludeFromTotals = i.ExcludeFromTotals
         }));
     }
 }
@@ -56,6 +58,8 @@ public sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
         b.Property(x => x.BankCode).HasColumnType("varchar(20)");
         b.Property(x => x.Last4).HasColumnType("char(4)");
         b.Property(x => x.Nickname).HasMaxLength(60);
+        b.Property(x => x.IbanTail).HasColumnType("char(4)");
+        b.Property(x => x.IsOwn).HasDefaultValue(false);
         b.HasIndex(x => new { x.UserId, x.BankCode, x.Last4 }).IsUnique().HasDatabaseName("UQ_Accounts");
         b.HasOne(x => x.User).WithMany(u => u.Accounts).HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
     }
