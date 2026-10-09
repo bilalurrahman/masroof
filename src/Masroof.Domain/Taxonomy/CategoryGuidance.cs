@@ -31,6 +31,7 @@ public static class CategoryGuidance
             [CategoryCodes.Investment] = "brokerage, stocks, funds & crypto (تداول, استثمار, صندوق, أسهم)",
             [CategoryCodes.Government] = "government services, fines & traffic violations (Absher, Sadad government, Muqeem, مخالفات, رسوم حكومية)",
             [CategoryCodes.TransferInternal] = "moving money between the user's OWN accounts (e.g. salary account → budget account, card top-up from own account); not spending. NOT remittances to other people (that is family_transfer)",
+            [CategoryCodes.Bnpl] = "buy-now-pay-later installments & payments (Tabby/تابي, Tamara/تمارا, MisPay/ميس باي, Spotii, Postpay, Madfu/مدفوع, قسط, تقسيط, أقساط) when the underlying store is NOT named. If the message names the actual merchant, categorize by that merchant instead and treat BNPL only as the payment method",
             [CategoryCodes.Other] = "anything that does not clearly fit another category",
         };
 

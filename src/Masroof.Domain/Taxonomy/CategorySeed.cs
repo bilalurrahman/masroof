@@ -39,6 +39,7 @@ public static class CategorySeed
         new(19, CategoryCodes.Government,     "Government",       "حكومي",            "account_balance","#546E7A"),
         new(20, CategoryCodes.Other,          "Other",            "أخرى",             "category",       "#90A4AE"),
         new(21, CategoryCodes.TransferInternal, "Internal Transfer", "تحويل داخلي",   "swap_horiz",     "#78909C", ExcludeFromTotals: true),
+        new(22, CategoryCodes.Bnpl,           "Buy Now Pay Later", "اشترِ الآن وادفع لاحقًا", "schedule", "#9575CD"),
     ];
 
     public static short IdFor(string code) =>

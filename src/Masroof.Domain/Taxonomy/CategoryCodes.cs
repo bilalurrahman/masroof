@@ -27,6 +27,7 @@ public static class CategoryCodes
     public const string Investment = "investment";
     public const string Government = "government";
     public const string TransferInternal = "transfer_internal";
+    public const string Bnpl = "bnpl";
     public const string Other = "other";
 
     /// <summary>All taxonomy codes in a stable, display order.</summary>
@@ -34,7 +35,7 @@ public static class CategoryCodes
     [
         Groceries, Dining, Transport, Fuel, Utilities, Telecom, Rent, Health,
         Education, Shopping, Entertainment, Travel, FamilyTransfer, Salary,
-        Refund, FeesCharges, AtmCash, Investment, Government, TransferInternal, Other
+        Refund, FeesCharges, AtmCash, Investment, Government, TransferInternal, Bnpl, Other
     ];
 
     private static readonly HashSet<string> AllSet = new(All, StringComparer.OrdinalIgnoreCase);

@@ -71,6 +71,14 @@
   font-family: var(--font-mono);
   font-size: 0.85rem;
 }
+.tag-bnpl {
+  flex: none;
+  padding: 0.05rem 0.4rem;
+  border: 1px solid #9575cd;
+  color: #9575cd;
+  border-radius: 2px;
+  font-size: 0.62rem;
+}
 .date {
   font-size: 0.8rem;
 }
