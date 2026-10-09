@@ -49,10 +49,18 @@
         @for (row of r.items; track row.id; let i = $index) {
           <div class="trow" [appReveal]="i" [revealY]="6">
             <div class="tmain">
-              <span class="amount num" [class.credit]="row.direction === 'credit'">
-                {{ row.direction === 'credit' ? '+' : '−' }}{{ row.amount | money: row.currency }}
+              <span class="amount num" [class.credit]="row.direction === 'credit'" [class.moved]="!!row.transferGroupId">
+                @if (row.transferGroupId) {
+                  {{ row.amount | money: row.currency }}
+                } @else {
+                  {{ row.direction === 'credit' ? '+' : '−' }}{{ row.amount | money: row.currency }}
+                }
               </span>
-              <span class="cp">{{ row.counterparty || '—' }}</span>
+              @if (row.transferGroupId && row.transferFrom && row.transferTo) {
+                <span class="cp transfer">⇄ {{ row.transferFrom }} → {{ row.transferTo }}</span>
+              } @else {
+                <span class="cp">{{ row.counterparty || '—' }}</span>
+              }
               <span class="muted date">{{ row.txnDate }}</span>
             </div>
             <div class="tmeta">

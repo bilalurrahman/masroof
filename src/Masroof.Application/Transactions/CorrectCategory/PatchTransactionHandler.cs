@@ -15,7 +15,8 @@ namespace Masroof.Application.Transactions.CorrectCategory;
 public sealed class PatchTransactionHandler(
     IAppDbContext db,
     ICurrentUser currentUser,
-    IClock clock)
+    IClock clock,
+    TransferPairingService pairing)
 {
     public async Task<TransactionDto> HandleAsync(PatchTransactionCommand cmd, CancellationToken ct)
     {
@@ -94,6 +95,10 @@ public sealed class PatchTransactionHandler(
             txn.Source = TransactionSource.Manual;
             db.Feedback.AddRange(feedback);
             await db.SaveChangesAsync(ct);
+
+            // Re-pair / dissolve internal-transfer legs if the category changed.
+            if (cmd.CategoryCode is not null)
+                await pairing.SyncAsync(txn.TransactionId, ct);
         }
 
         var category = await db.Categories.FirstAsync(c => c.CategoryId == txn.CategoryId, ct);

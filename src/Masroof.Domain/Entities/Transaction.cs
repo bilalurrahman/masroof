@@ -30,6 +30,13 @@ public class Transaction
     public DateTime? DeletedAt { get; set; }
     public DateTime CreatedAt { get; set; }
 
+    /// <summary>
+    /// When two legs of the same internal transfer (the debit out of one own account and the
+    /// credit into another) are matched, they share this id. The debit leg is treated as the
+    /// primary; the ledger collapses the pair to a single "A → B" row.
+    /// </summary>
+    public Guid? TransferGroupId { get; set; }
+
     /// <summary>SQL rowversion for optimistic concurrency.</summary>
     public byte[]? RowVer { get; set; }
 

@@ -89,10 +89,16 @@ export class Ledger implements OnInit {
   correct(row: TransactionDto, code: string): void {
     this.editingId.set(null);
     if (!code || code === row.category.code) return;
+    // Correcting to/from an internal transfer can pair or collapse rows — reload to reflect it.
+    const touchesTransfer = code === 'transfer_internal' || row.category.code === 'transfer_internal';
     this.api.patchTransaction(row.id, { categoryCode: code }).subscribe({
       next: (updated) => {
-        this.patchRow(updated);
         this.toast.success(`${this.i18n.t('capture.learned')}: ${updated.category.name}`);
+        if (touchesTransfer) {
+          this.load();
+        } else {
+          this.patchRow(updated);
+        }
       },
     });
   }

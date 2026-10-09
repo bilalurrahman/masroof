@@ -17,6 +17,7 @@ public static class DependencyInjection
     {
         services.AddScoped<ParseTransactionHandler>();
         services.AddScoped<PatchTransactionHandler>();
+        services.AddScoped<Transactions.TransferPairingService>();
         services.AddScoped<GetLedgerHandler>();
         services.AddScoped<DeleteTransactionHandler>();
         services.AddScoped<ListRulesHandler>();

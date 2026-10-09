@@ -57,10 +57,19 @@
 .amount.credit {
   color: var(--ok);
 }
+.amount.moved {
+  color: var(--text-muted);
+  font-weight: 500;
+}
 .cp {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.cp.transfer {
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
 }
 .date {
   font-size: 0.8rem;

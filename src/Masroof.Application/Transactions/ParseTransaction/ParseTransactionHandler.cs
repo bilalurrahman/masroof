@@ -22,6 +22,7 @@ public sealed class ParseTransactionHandler(
     IPreParser preParser,
     IRuleStore ruleStore,
     ILlmTransactionParser llm,
+    TransferPairingService pairing,
     ILogger<ParseTransactionHandler> logger)
 {
     public async Task<ParseResponse> HandleAsync(ParseTransactionCommand cmd, CancellationToken ct)
@@ -198,6 +199,10 @@ public sealed class ParseTransactionHandler(
 
         if (exact is not null)
             await ruleStore.IncrementHitCountAsync(exact.RuleId, ct);
+
+        // Pair the two legs of an internal transfer, if the opposite leg is already captured.
+        if (category.Code == CategoryCodes.TransferInternal)
+            await pairing.SyncAsync(txn.TransactionId, ct);
 
         var name = currentUser.Locale.StartsWith("ar", StringComparison.OrdinalIgnoreCase) ? category.NameAr : category.NameEn;
         return new ParseResponse(

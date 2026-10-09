@@ -21,6 +21,9 @@ export interface TransactionDto {
   source: Source;
   isCorrected: boolean;
   createdAt: string;
+  transferGroupId: string | null;
+  transferFrom: string | null;
+  transferTo: string | null;
 }
 
 export interface ParseResponse {

@@ -16,7 +16,10 @@ public sealed record TransactionDto(
     decimal? Confidence,
     string Source,
     bool IsCorrected,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    Guid? TransferGroupId = null,
+    string? TransferFrom = null,
+    string? TransferTo = null);
 
 /// <summary>The parse response: the saved row plus the hints that influenced it and latency.</summary>
 public sealed record ParseResponse(

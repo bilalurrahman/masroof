@@ -21,6 +21,10 @@ public sealed class GetLedgerHandler(IAppDbContext db, ICurrentUser currentUser)
 
         IQueryable<Transaction> q = db.Transactions.Where(t => t.UserId == userId && !t.IsDeleted);
 
+        // Collapse paired internal transfers to a single row: keep the debit (primary) leg and
+        // hide the credit (secondary) leg. Unpaired rows are unaffected.
+        q = q.Where(t => t.TransferGroupId == null || t.Direction == TransactionDirection.Debit);
+
         if (query is { Year: { } y, Month: { } m })
         {
             var from = new DateOnly(y, m, 1);
@@ -72,24 +76,71 @@ public sealed class GetLedgerHandler(IAppDbContext db, ICurrentUser currentUser)
                 t.Confidence,
                 t.Source,
                 t.IsCorrected,
-                t.CreatedAt
+                t.CreatedAt,
+                t.AccountId,
+                t.TransferGroupId
             })
             .ToListAsync(ct);
 
-        var items = rows.Select(r => new TransactionDto(
-            r.TransactionId,
-            r.Direction.ToDbValue(),
-            r.Amount,
-            r.Currency,
-            r.Counterparty,
-            r.Channel,
-            r.TxnDate,
-            new CategoryRef(r.Code, isArabic ? r.NameAr : r.NameEn),
-            r.Confidence,
-            r.Source.ToDbValue(),
-            r.IsCorrected,
-            r.CreatedAt)).ToList();
+        // For paired internal transfers, resolve "from → to" account labels for the row.
+        var groupIds = rows.Where(r => r.TransferGroupId != null)
+            .Select(r => r.TransferGroupId!.Value).Distinct().ToList();
+        var destAccountByGroup = new Dictionary<Guid, int?>();
+        var labelByAccount = new Dictionary<int, string>();
+        if (groupIds.Count > 0)
+        {
+            destAccountByGroup = (await db.Transactions
+                    .Where(t => t.TransferGroupId != null && groupIds.Contains(t.TransferGroupId.Value)
+                                && t.Direction == TransactionDirection.Credit)
+                    .Select(t => new { Gid = t.TransferGroupId!.Value, t.AccountId })
+                    .ToListAsync(ct))
+                .ToDictionary(x => x.Gid, x => x.AccountId);
+
+            labelByAccount = (await db.Accounts
+                    .Where(a => a.UserId == userId)
+                    .Select(a => new { a.AccountId, a.Nickname, a.BankCode, a.Last4 })
+                    .ToListAsync(ct))
+                .ToDictionary(a => a.AccountId, a => AccountLabel(a.Nickname, a.BankCode, a.Last4));
+        }
+
+        string? LabelOf(int? accountId) =>
+            accountId is { } id && labelByAccount.TryGetValue(id, out var l) ? l : null;
+
+        var items = rows.Select(r =>
+        {
+            string? from = null, to = null;
+            if (r.TransferGroupId is { } gid)
+            {
+                from = LabelOf(r.AccountId);
+                to = destAccountByGroup.TryGetValue(gid, out var destId) ? LabelOf(destId) : null;
+            }
+            return new TransactionDto(
+                r.TransactionId,
+                r.Direction.ToDbValue(),
+                r.Amount,
+                r.Currency,
+                r.Counterparty,
+                r.Channel,
+                r.TxnDate,
+                new CategoryRef(r.Code, isArabic ? r.NameAr : r.NameEn),
+                r.Confidence,
+                r.Source.ToDbValue(),
+                r.IsCorrected,
+                r.CreatedAt,
+                r.TransferGroupId,
+                from,
+                to);
+        }).ToList();
 
         return new PagedResult<TransactionDto>(items, page, pageSize, total);
+    }
+
+    /// <summary>A short display label for an account: its nickname, else "BANK ····1234".</summary>
+    private static string AccountLabel(string? nickname, string? bankCode, string? last4)
+    {
+        if (!string.IsNullOrWhiteSpace(nickname))
+            return nickname.Trim();
+        var bank = string.IsNullOrWhiteSpace(bankCode) || bankCode == "GENERIC" ? "Card" : bankCode;
+        return last4 is { Length: > 0 } ? $"{bank} ····{last4}" : bank;
     }
 }

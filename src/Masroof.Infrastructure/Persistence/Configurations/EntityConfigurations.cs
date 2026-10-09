@@ -104,6 +104,9 @@ public sealed class TransactionConfiguration : IEntityTypeConfiguration<Transact
         b.Property(x => x.CreatedAt).HasColumnType("datetime2(0)").HasDefaultValueSql("SYSUTCDATETIME()");
         b.Property(x => x.RowVer).IsRowVersion();
 
+        b.Property(x => x.TransferGroupId);
+        b.HasIndex(x => new { x.UserId, x.TransferGroupId }).HasDatabaseName("IX_Txn_TransferGroup");
+
         b.HasIndex(x => new { x.UserId, x.RawTextHash }).IsUnique().HasDatabaseName("UQ_Txn_Dedupe");
         b.HasIndex(x => new { x.UserId, x.TxnDate })
             .HasDatabaseName("IX_Txn_User_Date")
