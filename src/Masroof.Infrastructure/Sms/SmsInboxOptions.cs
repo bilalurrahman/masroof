@@ -19,7 +19,7 @@ public sealed class SmsInboxOptions
     /// </summary>
     public string[] Providers { get; set; } =
     [
-        "SABB", "ساب",
+        "SABB", "SAB", "ساب",
         "Alinma", "الانماء", "الإنماء", "إنماء",
         "D360", "دي360",
         "STCPay", "STC Pay", "STCPAY", "stc pay", "اس تي سي",

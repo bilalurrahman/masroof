@@ -178,7 +178,8 @@ public sealed partial class BankPreParser : IPreParser
 
     // Substring (not \b-anchored): bank SMS senders concatenate the name, e.g. "AlinmaPay",
     // "D360Bank-AD", "SABBAd". These tokens are distinctive enough that a substring is safe.
-    [GeneratedRegex(@"sabb|ساب", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    // "sabb?" covers both the SABB name and its SMS shortcode "SAB".
+    [GeneratedRegex(@"\bsabb?\b|sabb|ساب", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
     private static partial Regex SabbRegex();
 
     [GeneratedRegex(@"alinma|الإنماء|الانماء", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
