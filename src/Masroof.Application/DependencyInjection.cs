@@ -6,6 +6,7 @@ using Masroof.Application.Transactions.ParseTransaction;
 using Masroof.Application.Accounts;
 using Masroof.Application.Categories;
 using Masroof.Application.Rules;
+using Masroof.Application.Sms;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Masroof.Application;
@@ -16,6 +17,7 @@ public static class DependencyInjection
     public static IServiceCollection AddMasroofApplication(this IServiceCollection services)
     {
         services.AddScoped<ParseTransactionHandler>();
+        services.AddScoped<IngestSmsHandler>();
         services.AddScoped<PatchTransactionHandler>();
         services.AddScoped<Transactions.TransferPairingService>();
         services.AddScoped<GetLedgerHandler>();

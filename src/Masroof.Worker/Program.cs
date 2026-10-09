@@ -19,5 +19,10 @@ builder.Services.AddScoped<ICurrentUser>(sp => sp.GetRequiredService<WorkerCurre
 
 builder.Services.AddHostedService<OutboxProcessor>();
 
+// Weekly bank/wallet SMS ingestion (current month) from the on-device Messages inbox.
+builder.Services.Configure<SmsIngestionScheduleOptions>(
+    builder.Configuration.GetSection(SmsIngestionScheduleOptions.SectionName));
+builder.Services.AddHostedService<WeeklySmsIngestionService>();
+
 var host = builder.Build();
 host.Run();
