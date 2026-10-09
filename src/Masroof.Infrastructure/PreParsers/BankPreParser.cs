@@ -102,6 +102,7 @@ public sealed partial class BankPreParser : IPreParser
     private static string ExtractBankCode(string text) =>
         RajhiRegex().IsMatch(text) ? "RAJHI"
         : SnbRegex().IsMatch(text) ? "SNB"
+        : StcBankRegex().IsMatch(text) ? "STCBANK"
         : StcRegex().IsMatch(text) ? "STCPAY"
         : SabbRegex().IsMatch(text) ? "SABB"
         : AlinmaRegex().IsMatch(text) ? "ALINMA"
@@ -175,6 +176,9 @@ public sealed partial class BankPreParser : IPreParser
 
     [GeneratedRegex(@"stc\s*pay|stcpay", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
     private static partial Regex StcRegex();
+
+    [GeneratedRegex(@"stc\s*bank|اس تي سي", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex StcBankRegex();
 
     // Substring (not \b-anchored): bank SMS senders concatenate the name, e.g. "AlinmaPay",
     // "D360Bank-AD", "SABBAd". These tokens are distinctive enough that a substring is safe.

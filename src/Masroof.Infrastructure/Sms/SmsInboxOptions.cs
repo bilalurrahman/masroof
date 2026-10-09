@@ -22,7 +22,7 @@ public sealed class SmsInboxOptions
         "SABB", "SAB", "ساب",
         "Alinma", "الانماء", "الإنماء", "إنماء",
         "D360", "دي360",
-        "STCPay", "STC Pay", "STCPAY", "stc pay", "اس تي سي",
+        "STCPay", "STC Pay", "STCPAY", "stc pay", "STC Bank", "اس تي سي",
         "tiqmo", "Tiqmo", "تيكمو", "تكمو"
     ];
 }
