@@ -34,12 +34,17 @@ public sealed partial class MessagesSmsInbox(IOptions<SmsInboxOptions> options, 
         var toNs = ToAppleNanos(toUtc);
 
         var results = new List<SmsMessage>();
+        string? snapshotDir = null;
         try
         {
-            // Open via a file: URI with immutable=1 so we never take a lock on the live Messages
-            // DB (it is often held WAL-open by the Messages app). immutable implies read-only.
-            var uriPath = new UriBuilder { Scheme = "file", Host = string.Empty, Path = path }.Uri.AbsoluteUri;
-            var cs = $"Data Source={uriPath}?immutable=1;Mode=ReadOnly;Cache=Private";
+            // Snapshot the DB plus its -wal/-shm sidecars to a private temp copy, then open the
+            // copy. The live Messages DB runs in WAL mode, so the newest messages can still be in
+            // chat.db-wal, not yet checkpointed into chat.db. An immutable/read-only open of the
+            // original ignores the WAL and would miss them; copying the sidecars and opening the
+            // copy read-write checkpoints the WAL into our copy so we see every message — without
+            // ever touching or locking the user's live database.
+            var snapshotPath = SnapshotDatabase(path, out snapshotDir);
+            var cs = $"Data Source={snapshotPath};Pooling=False";
 
             await using var conn = new SqliteConnection(cs);
             await conn.OpenAsync(ct);
@@ -81,10 +86,46 @@ public sealed partial class MessagesSmsInbox(IOptions<SmsInboxOptions> options, 
                 "Could not read the Messages database at {Path}. Grant Full Disk Access to the host process.", path);
             return [];
         }
+        catch (IOException ex)
+        {
+            logger.LogError(ex, "Could not snapshot the Messages database at {Path}.", path);
+            return [];
+        }
+        finally
+        {
+            if (snapshotDir is not null)
+                TryDeleteDirectory(snapshotDir);
+        }
 
         logger.LogInformation("Read {Count} provider SMS from {Path} for {From:u}..{To:u}.",
             results.Count, path, fromUtc, toUtc);
         return results;
+    }
+
+    /// <summary>
+    /// Copies chat.db and its -wal/-shm sidecars into a fresh temp directory and returns the copy's
+    /// path. Opening the copy read-write lets SQLite checkpoint the WAL into it, so the newest
+    /// (not-yet-checkpointed) messages are visible. The original files are only read, never locked.
+    /// </summary>
+    private static string SnapshotDatabase(string path, out string snapshotDir)
+    {
+        snapshotDir = Path.Combine(Path.GetTempPath(), "masroof-sms-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(snapshotDir);
+        var dest = Path.Combine(snapshotDir, "chat.db");
+        File.Copy(path, dest, overwrite: true);
+        foreach (var ext in new[] { "-wal", "-shm" })
+        {
+            var sidecar = path + ext;
+            if (File.Exists(sidecar))
+                File.Copy(sidecar, dest + ext, overwrite: true);
+        }
+        return dest;
+    }
+
+    private void TryDeleteDirectory(string dir)
+    {
+        try { Directory.Delete(dir, recursive: true); }
+        catch (Exception ex) { logger.LogDebug(ex, "Could not delete SMS snapshot dir {Dir}.", dir); }
     }
 
     private string ResolvePath()
