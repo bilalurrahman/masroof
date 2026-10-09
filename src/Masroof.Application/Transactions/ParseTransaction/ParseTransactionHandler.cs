@@ -22,6 +22,7 @@ public sealed class ParseTransactionHandler(
     IPreParser preParser,
     IRuleStore ruleStore,
     ILlmTransactionParser llm,
+    ICategoryClassifier classifier,
     TransferPairingService pairing,
     ILogger<ParseTransactionHandler> logger)
 {
@@ -58,9 +59,10 @@ public sealed class ParseTransactionHandler(
         var source = TransactionSource.Llm;
         var reparsePending = false;
 
-        if (preConfident && exact is not null)
+        if (preConfident && (exact is not null || classifier.IsEnabled))
         {
-            // Fully deterministic: structure from the pre-parser, category from the exact rule.
+            // Structure is fully deterministic from the pre-parser; the category comes from the
+            // exact rule or the external classifier, so the local LLM can be skipped entirely.
             source = TransactionSource.PreParser;
         }
         else
@@ -112,23 +114,29 @@ public sealed class ParseTransactionHandler(
         var last4 = Coalesce(pre?.Last4, parsed?.AccountLast4);
         var txnDate = pre?.Date ?? parsed?.Date ?? clock.Today;
 
-        // Category precedence: an explicit learned rule wins; otherwise, if this looks like a
-        // transfer whose other side is one of the user's own accounts, it is internal movement
-        // (not spending); otherwise fall back to the LLM's suggestion.
+        // Category precedence: an explicit learned rule wins; then internal-transfer detection
+        // (money between the user's own accounts); then the external classifier when enabled
+        // (better multilingual categorization); finally the LLM's own suggestion.
         var internalTransfer = exact is null
             && channel == TransactionChannel.Transfer
             && await MatchesOwnAccountAsync(userId, normalized, counterparty, ct);
+
+        CategorySuggestion? classified = null;
+        if (exact is null && !internalTransfer && classifier.IsEnabled)
+            classified = await classifier.ClassifyAsync(normalized, ct);
 
         var categoryCode = exact is not null
             ? CategoryCodes.ResolveOrOther(exact.CategoryCode)
             : internalTransfer
                 ? CategoryCodes.TransferInternal
-                : CategoryCodes.ResolveOrOther(parsed?.Category);
+                : classified is not null
+                    ? CategoryCodes.ResolveOrOther(classified.Code)
+                    : CategoryCodes.ResolveOrOther(parsed?.Category);
         var confidence = exact is not null
             ? 1.0
             : internalTransfer
                 ? 0.9
-                : (parsed?.Confidence ?? pre?.Confidence ?? 0.0);
+                : classified?.Confidence ?? parsed?.Confidence ?? pre?.Confidence ?? 0.0;
 
         ValidateBusinessRules(amount, currency, txnDate);
 
