@@ -89,6 +89,9 @@ public sealed partial class BankPreParser : IPreParser
 
     private static string? ExtractChannel(string text)
     {
+        // BNPL providers are checked first: they are a distinct payment method and the card/pos
+        // keywords in the same SMS should not mask them.
+        if (BnplRegex().IsMatch(text)) return TransactionChannel.Bnpl;
         if (AtmRegex().IsMatch(text)) return TransactionChannel.Atm;
         if (PosRegex().IsMatch(text)) return TransactionChannel.Pos;
         if (TransferRegex().IsMatch(text)) return TransactionChannel.Transfer;
@@ -149,6 +152,11 @@ public sealed partial class BankPreParser : IPreParser
 
     [GeneratedRegex(@"transfer|حوالة|تحويل", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
     private static partial Regex TransferRegex();
+
+    // Buy-now-pay-later providers (Gulf): Tabby, Tamara, MisPay, Spotii, Postpay, Madfu.
+    [GeneratedRegex(@"\btabby\b|\btamara\b|\bmispay\b|\bspotii\b|\bpostpay\b|\bmadfu\b|تابي|تمارا|ميس\s*باي|مدفوع",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex BnplRegex();
 
     [GeneratedRegex(@"\bcard\b|بطاقة|مدى|mada|visa|mastercard", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
     private static partial Regex CardRegex();

@@ -13,9 +13,12 @@ public static class TransactionChannel
     public const string Pos = "pos";
     public const string Online = "online";
 
+    /// <summary>Buy-now-pay-later provider (Tabby, Tamara, …) — a payment method, not a category.</summary>
+    public const string Bnpl = "bnpl";
+
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
-        Card, Transfer, Wallet, Atm, Pos, Online
+        Card, Transfer, Wallet, Atm, Pos, Online, Bnpl
     };
 
     /// <summary>Returns the normalized channel if recognized, otherwise null.</summary>

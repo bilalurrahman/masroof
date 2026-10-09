@@ -7,7 +7,7 @@ namespace Masroof.Infrastructure.Llm;
 public sealed class PromptBuilder
 {
     /// <summary>Stored in ParseTraces so eval results are attributable to a prompt revision.</summary>
-    public const string Version = "parse-v3";
+    public const string Version = "parse-v4";
 
     private const string FewShotExamples = """
         Input: "شراء بقيمة 87.50 ريال لدى بندة فرع العليا بطاقة تنتهي 1234"
@@ -42,6 +42,12 @@ public sealed class PromptBuilder
 
         Input: "Refund SAR 60.00 from NOON reversed to your card"
         Output: {"direction":"credit","amount":60.00,"currency":"SAR","counterparty":"Noon","channel":"card","accountLast4":null,"date":null,"category":"refund","confidence":0.9}
+
+        Input: "Payment of SAR 100.00 to Tabby installment 2 of 4"
+        Output: {"direction":"debit","amount":100.00,"currency":"SAR","counterparty":"Tabby","channel":"bnpl","accountLast4":null,"date":null,"category":"bnpl","confidence":0.95}
+
+        Input: "شراء 150 ريال عبر تمارا من نمشي"
+        Output: {"direction":"debit","amount":150,"currency":"SAR","counterparty":"Namshi","channel":"bnpl","accountLast4":null,"date":null,"category":"shopping","confidence":0.9}
         """;
 
     public string Build(IReadOnlyList<string> hints, string defaultCurrency, DateOnly today)

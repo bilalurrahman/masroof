@@ -11,16 +11,16 @@ public static class CategoryGuidance
     public static readonly IReadOnlyDictionary<string, string> Descriptions =
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            [CategoryCodes.Groceries] = "supermarkets & grocery stores (Panda, Carrefour, Lulu, Danube, Tamimi, Othaim, بقالة, تموينات)",
-            [CategoryCodes.Dining] = "restaurants, cafés, coffee shops, fast food & food delivery (Starbucks, McDonald's, Herfy, Dunkin, Jahez, HungerStation, مطعم, كافيه, قهوة)",
-            [CategoryCodes.Transport] = "ride-hailing, taxi, bus, metro, parking & tolls (Uber, Careem, Jeeny, SAPTCO, مواصلات, أجرة) — NOT petrol",
-            [CategoryCodes.Fuel] = "petrol / gas stations (Aldrees, Sasco, Petromin, محطة وقود, بنزين)",
+            [CategoryCodes.Groceries] = "supermarkets & grocery stores (Panda/بندة, Carrefour/كارفور, Lulu/لولو, Danube/الدانوب, Tamimi/التميمي, Othaim/العثيم, Nesto/نستو, بقالة, تموينات, سوبرماركت)",
+            [CategoryCodes.Dining] = "restaurants, cafés, coffee shops, fast food & food delivery (Starbucks/ستاربكس, McDonald's/ماكدونالدز, Herfy/هرفي, Al Baik/البيك, Kudo/كودو, Dunkin/دانكن, Jahez/جاهز, HungerStation/هنقرستيشن, مطعم, كافيه, قهوة)",
+            [CategoryCodes.Transport] = "ride-hailing, taxi, bus, metro, parking & tolls (Uber/أوبر, Careem/كريم, Jeeny/جيني, SAPTCO, مواصلات, أجرة, تاكسي) — NOT petrol",
+            [CategoryCodes.Fuel] = "petrol / gas stations (Aldrees/الدريس, Sasco/ساسكو, Petromin/بترومين, محطة وقود, بنزين, محطة)",
             [CategoryCodes.Utilities] = "electricity, water & gas bills (SEC/الكهرباء, NWC/المياه, كهرباء, مياه, فاتورة)",
-            [CategoryCodes.Telecom] = "mobile, internet & landline (STC, Mobily, Zain, Salam, اتصالات, انترنت, باقة)",
+            [CategoryCodes.Telecom] = "mobile, internet & landline (STC/إس تي سي, Mobily/موبايلي, Zain/زين, Salam/سلام, اتصالات, انترنت, باقة)",
             [CategoryCodes.Rent] = "housing rent & Ejar payments (إيجار, اجار, Ejar)",
-            [CategoryCodes.Health] = "pharmacies, clinics, hospitals & labs (Nahdi, Al-Dawaa, Dr. Sulaiman Al Habib, صيدلية, مستشفى, عيادة)",
+            [CategoryCodes.Health] = "pharmacies, clinics, hospitals & labs (Nahdi/النهدي, Al-Dawaa/الدواء, Dr. Sulaiman Al Habib/سليمان الحبيب, صيدلية, مستشفى, عيادة)",
             [CategoryCodes.Education] = "schools, universities, courses & tuition (مدرسة, جامعة, دورة, رسوم دراسية, tuition)",
-            [CategoryCodes.Shopping] = "retail goods — electronics, clothing, books, furniture, general merchandise (Jarir, Extra, Noon, Amazon, IKEA, SACO, Centrepoint, تسوق)",
+            [CategoryCodes.Shopping] = "retail goods — electronics, clothing, books, furniture, general merchandise (Jarir/جرير, Extra/إكسترا, Noon/نون, Amazon/أمازون, IKEA/ايكيا, SACO/ساكو, Centrepoint, تسوق)",
             [CategoryCodes.Entertainment] = "streaming, games, cinema & events (Netflix, Shahid, Spotify, PlayStation, VOX/AMC cinema, سينما, ألعاب)",
             [CategoryCodes.Travel] = "flights, hotels & car rental (Saudia, Flynas, flyadeal, Booking, Almosafer, فندق, طيران, تذكرة)",
             [CategoryCodes.FamilyTransfer] = "transfers to family members or individuals, and remittances (تحويل إلى, حوالة, remittance to a person)",
@@ -31,6 +31,7 @@ public static class CategoryGuidance
             [CategoryCodes.Investment] = "brokerage, stocks, funds & crypto (تداول, استثمار, صندوق, أسهم)",
             [CategoryCodes.Government] = "government services, fines & traffic violations (Absher, Sadad government, Muqeem, مخالفات, رسوم حكومية)",
             [CategoryCodes.TransferInternal] = "moving money between the user's OWN accounts (e.g. salary account → budget account, card top-up from own account); not spending. NOT remittances to other people (that is family_transfer)",
+            [CategoryCodes.Bnpl] = "buy-now-pay-later installments & payments (Tabby/تابي, Tamara/تمارا, MisPay/ميس باي, Spotii, Postpay, Madfu/مدفوع, قسط, تقسيط, أقساط) when the underlying store is NOT named. If the message names the actual merchant, categorize by that merchant instead and treat BNPL only as the payment method",
             [CategoryCodes.Other] = "anything that does not clearly fit another category",
         };
 

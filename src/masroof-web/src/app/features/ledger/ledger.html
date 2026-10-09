@@ -61,6 +61,9 @@
               } @else {
                 <span class="cp">{{ row.counterparty || '—' }}</span>
               }
+              @if (row.channel === 'bnpl') {
+                <span class="tag-bnpl mono-label" title="Buy now, pay later">BNPL</span>
+              }
               <span class="muted date">{{ row.txnDate }}</span>
             </div>
             <div class="tmeta">

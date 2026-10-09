@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using Masroof.Application.Abstractions;
 using Masroof.Application.Ask;
 using Masroof.Infrastructure.Ask;
+using Masroof.Infrastructure.Classification;
 using Masroof.Infrastructure.Identity;
 using Masroof.Infrastructure.Llm;
 using Masroof.Infrastructure.Persistence;
@@ -45,6 +46,16 @@ public static class DependencyInjection
             .AddResilience(llm);
         services.AddHttpClient<IEmbeddingService, OllamaEmbeddingService>(c => ConfigureLlmClient(c, llm))
             .AddResilience(llm);
+
+        // Optional external category classifier (TypeSafe). Off unless configured; when enabled
+        // it sends message text to an external API, relaxing zero-egress — an explicit opt-in.
+        services.Configure<TypeSafeOptions>(config.GetSection(TypeSafeOptions.SectionName));
+        var typeSafe = config.GetSection(TypeSafeOptions.SectionName).Get<TypeSafeOptions>() ?? new TypeSafeOptions();
+        services.AddHttpClient<ICategoryClassifier, TypeSafeCategoryClassifier>(c =>
+        {
+            c.Timeout = TimeSpan.FromSeconds(typeSafe.TimeoutSeconds + 5);
+            c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        });
 
         // Chat client for the Ask flow, with automatic tool invocation.
         services.AddSingleton<IChatClient>(_ =>
