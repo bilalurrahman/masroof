@@ -141,3 +141,10 @@ export interface LedgerFilters {
   page?: number;
   pageSize?: number;
 }
+
+export interface SmsSyncResult {
+  scanned: number;
+  imported: number;
+  duplicates: number;
+  failed: number;
+}

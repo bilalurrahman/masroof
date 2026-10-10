@@ -1,6 +1,18 @@
 <section class="ledger">
   <p class="mono-label eyebrow">◆ LEDGER</p>
-  <h1>{{ i18n.t('ledger.heading') }}</h1>
+  <div class="ledger-head">
+    <h1>{{ i18n.t('ledger.heading') }}</h1>
+    <button
+      appPress
+      class="btn sync-btn"
+      type="button"
+      [disabled]="syncing()"
+      (click)="sync()"
+      title="Import this month's bank SMS (SABB, Alinma, D360, STC, tiqmo) from your Messages inbox"
+    >
+      {{ syncing() ? 'Syncing…' : '↻ Sync SMS' }}
+    </button>
+  </div>
 
   <div class="filters card">
     <input

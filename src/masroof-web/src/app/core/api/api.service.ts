@@ -13,6 +13,7 @@ import {
   ParseResponse,
   PatchTransactionRequest,
   RuleDto,
+  SmsSyncResult,
   TransactionDto,
   TrendPoint,
   UpsertAccountRequest,
@@ -30,6 +31,11 @@ export class ApiService {
 
   parseBatch(text: string): Observable<JobAccepted> {
     return this.http.post<JobAccepted>(`${this.base}/transactions/parse-batch`, { text });
+  }
+
+  /** Import this month's bank/wallet SMS from the device inbox into the ledger. */
+  syncSms(): Observable<SmsSyncResult> {
+    return this.http.post<SmsSyncResult>(`${this.base}/transactions/sync-sms`, {});
   }
 
   getLedger(filters: LedgerFilters): Observable<PagedResult<TransactionDto>> {
