@@ -4,6 +4,7 @@ using Masroof.Application.Abstractions;
 using Masroof.Application.Common;
 using Masroof.Application.Transactions.CorrectCategory;
 using Masroof.Application.Transactions.DeleteTransaction;
+using Masroof.Application.Sms;
 using Masroof.Application.Transactions.GetLedger;
 using Masroof.Application.Transactions.ParseTransaction;
 using Masroof.Domain.Entities;
@@ -22,6 +23,9 @@ public static class TransactionEndpoints
 
         group.MapPost("/transactions/parse-batch", ParseBatchAsync)
             .WithSummary("Queue a batch of messages (separated by a blank line) for background parsing.");
+
+        group.MapPost("/transactions/sync-sms", SyncSmsAsync)
+            .WithSummary("Import this month's bank/wallet SMS (SABB, Alinma, D360, STC, tiqmo) from the device inbox.");
 
         group.MapGet("/transactions", GetLedgerAsync)
             .WithSummary("List the ledger, paged and filtered.");
@@ -70,6 +74,15 @@ public static class TransactionEndpoints
         await db.SaveChangesAsync(ct);
 
         return Results.Accepted($"/api/jobs/{outbox.OutboxId}", new JobAccepted(outbox.OutboxId, messages.Count));
+    }
+
+    private static async Task<IResult> SyncSmsAsync(
+        IngestSmsHandler handler,
+        IClock clock,
+        CancellationToken ct)
+    {
+        var result = await handler.HandleCurrentMonthAsync(clock.Today, ct);
+        return Results.Ok(result);
     }
 
     private static async Task<IResult> GetLedgerAsync(

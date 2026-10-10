@@ -26,4 +26,11 @@ public sealed class LlmOptions
 
     /// <summary>Max concurrent LLM calls, to match GPU capacity.</summary>
     public int MaxConcurrency { get; set; } = 4;
+
+    /// <summary>
+    /// Token budget for a parse response. 256 is ample for a plain JSON object; reasoning models
+    /// (e.g. glm-*) emit chain-of-thought before the JSON, so they need far more room — set this
+    /// to ~2000 for those.
+    /// </summary>
+    public int ParseNumPredict { get; set; } = 256;
 }

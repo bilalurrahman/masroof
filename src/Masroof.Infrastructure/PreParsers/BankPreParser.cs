@@ -102,7 +102,12 @@ public sealed partial class BankPreParser : IPreParser
     private static string ExtractBankCode(string text) =>
         RajhiRegex().IsMatch(text) ? "RAJHI"
         : SnbRegex().IsMatch(text) ? "SNB"
+        : StcBankRegex().IsMatch(text) ? "STCBANK"
         : StcRegex().IsMatch(text) ? "STCPAY"
+        : SabbRegex().IsMatch(text) ? "SABB"
+        : AlinmaRegex().IsMatch(text) ? "ALINMA"
+        : D360Regex().IsMatch(text) ? "D360"
+        : TiqmoRegex().IsMatch(text) ? "TIQMO"
         : "GENERIC";
 
     private static DateOnly? ExtractDate(string text)
@@ -114,8 +119,10 @@ public sealed partial class BankPreParser : IPreParser
         return null;
     }
 
-    // Amount: optional currency token on either side of a number (digits already ASCII-normalized).
-    [GeneratedRegex(@"(?:(?:SAR|SR|USD|AED|ر\.?\s?س|درهم|دولار)\s*)?(?<amt>\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?|\d+(?:\.\d{1,2})?)\s*(?:SAR|SR|USD|AED|ر\.?\s?س|ريال|درهم|دولار)",
+    // Amount: a currency token on EITHER side of the number (leading "SAR 250.00" or trailing
+    // "250.00 ريال"). At least one currency token is required so bare numbers (dates, card tails)
+    // are not misread as amounts. .NET allows the duplicate "amt" group across the alternation.
+    [GeneratedRegex(@"(?:(?:SAR|SR|USD|AED|ر\.?\s?س|درهم|دولار)\s*(?<amt>\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?|\d+(?:\.\d{1,2})?))|(?:(?<amt>\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?|\d+(?:\.\d{1,2})?)\s*(?:SAR|SR|USD|AED|ر\.?\s?س|ريال|درهم|دولار))",
         RegexOptions.IgnoreCase | RegexOptions.Compiled)]
     private static partial Regex AmountRegex();
 
@@ -169,6 +176,24 @@ public sealed partial class BankPreParser : IPreParser
 
     [GeneratedRegex(@"stc\s*pay|stcpay", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
     private static partial Regex StcRegex();
+
+    [GeneratedRegex(@"stc\s*bank|اس تي سي", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex StcBankRegex();
+
+    // Substring (not \b-anchored): bank SMS senders concatenate the name, e.g. "AlinmaPay",
+    // "D360Bank-AD", "SABBAd". These tokens are distinctive enough that a substring is safe.
+    // "sabb?" covers both the SABB name and its SMS shortcode "SAB".
+    [GeneratedRegex(@"\bsabb?\b|sabb|ساب", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex SabbRegex();
+
+    [GeneratedRegex(@"alinma|الإنماء|الانماء", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex AlinmaRegex();
+
+    [GeneratedRegex(@"d360|دي\s*360", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex D360Regex();
+
+    [GeneratedRegex(@"tiqmo|تيكمو|تكمو", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex TiqmoRegex();
 
     [GeneratedRegex(@"(?<d>\d{4}-\d{2}-\d{2}|\d{2}/\d{2}/\d{4}|\d{2}-\d{2}-\d{4})", RegexOptions.Compiled)]
     private static partial Regex DateRegex();

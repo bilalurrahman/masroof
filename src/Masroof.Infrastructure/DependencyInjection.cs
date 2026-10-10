@@ -8,6 +8,7 @@ using Masroof.Infrastructure.Llm;
 using Masroof.Infrastructure.Persistence;
 using Masroof.Infrastructure.PreParsers;
 using Masroof.Infrastructure.Rules;
+using Masroof.Infrastructure.Sms;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
@@ -36,6 +37,10 @@ public static class DependencyInjection
         services.AddSingleton<PromptBuilder>();
         services.AddSingleton(new LlmConcurrencyLimiter(llm.MaxConcurrency));
         services.AddSingleton<IPreParser, BankPreParser>();
+
+        // On-device SMS inbox (macOS Messages chat.db) for scheduled bank/wallet ingestion.
+        services.Configure<SmsInboxOptions>(config.GetSection(SmsInboxOptions.SectionName));
+        services.AddSingleton<ISmsInbox, MessagesSmsInbox>();
 
         services.AddScoped<IReportQueries, ReportQueries>();
         services.AddScoped<IRuleStore, RuleStore>();

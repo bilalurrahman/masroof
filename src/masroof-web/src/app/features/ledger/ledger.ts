@@ -41,6 +41,7 @@ export class Ledger implements OnInit {
   protected readonly page = signal(1);
 
   protected readonly loading = signal(false);
+  protected readonly syncing = signal(false);
   protected readonly result = signal<PagedResult<TransactionDto> | null>(null);
   protected readonly editingId = signal<number | null>(null);
 
@@ -79,6 +80,23 @@ export class Ledger implements OnInit {
         },
         error: () => this.loading.set(false),
       });
+  }
+
+  /** Pull this month's bank/wallet SMS from the device inbox, then refresh the ledger. */
+  sync(): void {
+    if (this.syncing()) return;
+    this.syncing.set(true);
+    this.api.syncSms().subscribe({
+      next: (r) => {
+        this.syncing.set(false);
+        this.toast.success(`Synced SMS — imported ${r.imported}, ${r.duplicates} already there`);
+        this.load();
+      },
+      error: () => {
+        this.syncing.set(false);
+        this.toast.error('SMS sync failed. Check that the app has Full Disk Access.');
+      },
+    });
   }
 
   changePage(delta: number): void {
