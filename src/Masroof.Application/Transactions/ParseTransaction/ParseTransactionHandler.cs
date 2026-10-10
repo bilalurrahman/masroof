@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Masroof.Application.Abstractions;
 using Masroof.Application.Common;
 using Masroof.Domain.Entities;
@@ -110,6 +111,15 @@ public sealed class ParseTransactionHandler(
                         ?? (parsed is not null ? TransactionDirectionExtensions.ParseDirection(parsed.Direction) : TransactionDirection.Debit);
         var currency = (pre?.Currency ?? parsed?.Currency ?? currentUser.Currency).Trim().ToUpperInvariant();
         var counterparty = Coalesce(pre?.Counterparty, parsed?.Counterparty);
+        // Anti-hallucination guardrail: many bank SMS (e.g. a bare "PoS Purchase, card, amount")
+        // carry no merchant, and models tend to invent one. Keep the counterparty only when it is
+        // actually present in the message text. Pre-parser values are extracted from the text, so
+        // they always pass; this only strips fabricated names the model added out of thin air.
+        if (counterparty is not null && !CounterpartyAppearsInText(normalized, counterparty))
+        {
+            logger.LogDebug("Dropping counterparty '{Counterparty}' — not present in message text.", counterparty);
+            counterparty = null;
+        }
         var channel = TransactionChannel.Normalize(Coalesce(pre?.Channel, parsed?.Channel));
         var last4 = Coalesce(pre?.Last4, parsed?.AccountLast4);
         var txnDate = pre?.Date ?? parsed?.Date ?? clock.Today;
@@ -226,6 +236,28 @@ public sealed class ParseTransactionHandler(
             source.ToDbValue(),
             hints,
             llmResult?.LatencyMs ?? 0);
+    }
+
+    /// <summary>
+    /// True when the candidate counterparty is grounded in the message text: either the whole
+    /// (normalized) name occurs in it, or its longest word (≥4 letters) does. Used to reject
+    /// merchant names a model fabricated for SMS that contain none.
+    /// </summary>
+    private static bool CounterpartyAppearsInText(string normalizedText, string counterparty)
+    {
+        var hay = normalizedText.ToLowerInvariant();
+        var cand = counterparty.Trim().ToLowerInvariant();
+        if (cand.Length == 0)
+            return false;
+        if (hay.Contains(cand, StringComparison.Ordinal))
+            return true;
+
+        string? longest = null;
+        foreach (Match m in Regex.Matches(cand, @"\p{L}{4,}"))
+            if (longest is null || m.Value.Length > longest.Length)
+                longest = m.Value;
+
+        return longest is not null && hay.Contains(longest, StringComparison.Ordinal);
     }
 
     private static string? Coalesce(string? a, string? b) =>
