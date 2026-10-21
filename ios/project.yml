@@ -1,0 +1,43 @@
+name: Masroof
+options:
+  bundleIdPrefix: com.bilalurrahman
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+targets:
+  Masroof:
+    type: application
+    platform: iOS
+    sources:
+      - Masroof
+    info:
+      path: Masroof/Info.plist
+      properties:
+        CFBundleDisplayName: Masroof
+        UILaunchScreen:
+          UIColorName: ""
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        # The Masroof API is served over plain HTTP (localhost in the Simulator, the Mac's LAN IP
+        # from a device). This is a dev build, so allow insecure HTTP loads.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+          NSAllowsArbitraryLoads: true
+          NSExceptionDomains:
+            localhost:
+              NSExceptionAllowsInsecureHTTPLoads: true
+              NSIncludesSubdomains: true
+        # iOS 14+ asks the user before an app talks to devices on the local network.
+        NSLocalNetworkUsageDescription: "Masroof connects to your Mac on the local network to load your ledger from the Masroof API."
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.bilalurrahman.masroof
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        GENERATE_INFOPLIST_FILE: NO
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "5.0"
+        ENABLE_USER_SCRIPT_SANDBOXING: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""

@@ -7,6 +7,7 @@ import { ToastService } from '../../core/ui/toast.service';
 import { Direction, PagedResult, TransactionDto } from '../../core/models/api-models';
 import { CategoryChip } from '../../shared/components/category-chip';
 import { ConfidenceBadge } from '../../shared/components/confidence-badge';
+import { DateRange, DateRangeFilter } from '../../shared/components/date-range-filter';
 import { EmptyState } from '../../shared/components/empty-state';
 import { MoneyPipe } from '../../shared/pipes/money.pipe';
 import { RevealDirective } from '../../shared/motion/reveal.directive';
@@ -19,6 +20,7 @@ import { PressDirective } from '../../shared/motion/press.directive';
     FormsModule,
     CategoryChip,
     ConfidenceBadge,
+    DateRangeFilter,
     EmptyState,
     MoneyPipe,
     RevealDirective,
@@ -33,7 +35,8 @@ export class Ledger implements OnInit {
   protected readonly i18n = inject(I18nService);
   protected readonly categoriesStore = inject(CategoriesStore);
 
-  protected readonly month = signal('');
+  protected readonly fromDate = signal('');
+  protected readonly toDate = signal('');
   protected readonly category = signal('');
   protected readonly direction = signal<'' | Direction>('');
   protected readonly search = signal('');
@@ -61,11 +64,18 @@ export class Ledger implements OnInit {
     this.load();
   }
 
+  onRange(r: DateRange): void {
+    this.fromDate.set(r.from);
+    this.toDate.set(r.to);
+    this.applyFilters();
+  }
+
   load(): void {
     this.loading.set(true);
     this.api
       .getLedger({
-        month: this.month() || undefined,
+        from: this.fromDate() || undefined,
+        to: this.toDate() || undefined,
         category: this.category() || undefined,
         direction: this.direction() || undefined,
         q: this.search() || undefined,

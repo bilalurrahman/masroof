@@ -20,8 +20,19 @@ public static class ReportEndpoints
         ICurrentUser currentUser,
         IClock clock,
         CancellationToken ct,
-        [FromQuery] string? month = null)
+        [FromQuery] string? month = null,
+        [FromQuery] DateOnly? from = null,
+        [FromQuery] DateOnly? to = null)
     {
+        // A From/To range wins over month. If only one bound is given, the other defaults sensibly.
+        if (from is not null || to is not null)
+        {
+            var f = from ?? to!.Value;
+            var t = to ?? from!.Value;
+            var rangeSummary = await reports.GetRangeSummaryAsync(currentUser.UserId, f, t, ct);
+            return Results.Ok(rangeSummary);
+        }
+
         var key = MonthKey.TryParse(month, out var parsed) ? parsed : MonthKey.FromDate(clock.Today);
         var summary = await reports.GetMonthlySummaryAsync(currentUser.UserId, key.Year, key.Month, ct);
         return Results.Ok(summary);

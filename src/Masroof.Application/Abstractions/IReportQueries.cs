@@ -11,6 +11,12 @@ public interface IReportQueries
 {
     Task<MonthlySummary> GetMonthlySummaryAsync(Guid userId, int year, int month, CancellationToken ct);
 
+    /// <summary>
+    /// Summary over an arbitrary date range. <paramref name="from"/> and <paramref name="to"/> are
+    /// both inclusive. The "previous" comparison uses the immediately preceding window of equal length.
+    /// </summary>
+    Task<MonthlySummary> GetRangeSummaryAsync(Guid userId, DateOnly from, DateOnly to, CancellationToken ct);
+
     Task<IReadOnlyList<TrendPoint>> GetTrendAsync(Guid userId, int months, CancellationToken ct);
 
     Task<IReadOnlyList<CategoryTotal>> GetSpendByCategoryAsync(Guid userId, int year, int month, CancellationToken ct);

@@ -1,0 +1,63 @@
+<div class="range card">
+  <div class="presets">
+    <button
+      appPress
+      type="button"
+      class="chip"
+      [class.on]="active() === 'month'"
+      (click)="preset('month')"
+    >
+      {{ i18n.t('filter.thisMonth') }}
+    </button>
+    <button
+      appPress
+      type="button"
+      class="chip"
+      [class.on]="active() === 'last30'"
+      (click)="preset('last30')"
+    >
+      {{ i18n.t('filter.last30') }}
+    </button>
+    <button
+      appPress
+      type="button"
+      class="chip"
+      [class.on]="active() === 'ytd'"
+      (click)="preset('ytd')"
+    >
+      {{ i18n.t('filter.ytd') }}
+    </button>
+  </div>
+
+  <div class="dates">
+    <label class="field">
+      <span class="mono-label">{{ i18n.t('filter.from') }}</span>
+      <input
+        class="input"
+        type="date"
+        [ngModel]="from()"
+        (ngModelChange)="setFrom($event)"
+        [max]="to() || null"
+        [attr.aria-label]="i18n.t('filter.from')"
+      />
+    </label>
+    <span class="arrow" aria-hidden="true">→</span>
+    <label class="field">
+      <span class="mono-label">{{ i18n.t('filter.to') }}</span>
+      <input
+        class="input"
+        type="date"
+        [ngModel]="to()"
+        (ngModelChange)="setTo($event)"
+        [min]="from() || null"
+        [attr.aria-label]="i18n.t('filter.to')"
+      />
+    </label>
+
+    @if (from() || to()) {
+      <button appPress type="button" class="clear" (click)="clear()">
+        ✕ {{ i18n.t('filter.clear') }}
+      </button>
+    }
+  </div>
+</div>

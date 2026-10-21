@@ -14,14 +14,9 @@
     </button>
   </div>
 
+  <app-date-range-filter (rangeChange)="onRange($event)" />
+
   <div class="filters card">
-    <input
-      class="input"
-      type="month"
-      [ngModel]="month()"
-      (ngModelChange)="month.set($event); applyFilters()"
-      [attr.aria-label]="i18n.t('common.date')"
-    />
     <select class="input" [ngModel]="category()" (ngModelChange)="category.set($event); applyFilters()">
       <option value="">{{ i18n.t('ledger.all') }}</option>
       @for (c of categoriesStore.categories(); track c.code) {

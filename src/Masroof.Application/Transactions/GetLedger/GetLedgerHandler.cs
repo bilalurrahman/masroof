@@ -25,7 +25,14 @@ public sealed class GetLedgerHandler(IAppDbContext db, ICurrentUser currentUser)
         // hide the credit (secondary) leg. Unpaired rows are unaffected.
         q = q.Where(t => t.TransferGroupId == null || t.Direction == TransactionDirection.Debit);
 
-        if (query is { Year: { } y, Month: { } m })
+        // An explicit From/To range takes precedence over the month filter (the UI uses one or the
+        // other). Both bounds are inclusive — "to" is the last day the user picked.
+        if (query.From is not null || query.To is not null)
+        {
+            if (query.From is { } f) q = q.Where(t => t.TxnDate >= f);
+            if (query.To is { } tt) q = q.Where(t => t.TxnDate <= tt);
+        }
+        else if (query is { Year: { } y, Month: { } m })
         {
             var from = new DateOnly(y, m, 1);
             var to = from.AddMonths(1);

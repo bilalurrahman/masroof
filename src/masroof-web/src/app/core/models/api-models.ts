@@ -133,6 +133,10 @@ export interface PatchTransactionRequest {
 
 export interface LedgerFilters {
   month?: string;
+  /** Inclusive start of a date range (yyyy-MM-dd). Takes precedence over `month`. */
+  from?: string;
+  /** Inclusive end of a date range (yyyy-MM-dd). */
+  to?: string;
   category?: string;
   direction?: Direction;
   accountId?: number;

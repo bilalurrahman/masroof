@@ -10,4 +10,6 @@ public sealed record GetLedgerQuery(
     string? Search = null,
     bool NeedsReview = false,
     int Page = 1,
-    int PageSize = 50);
+    int PageSize = 50,
+    DateOnly? From = null,
+    DateOnly? To = null);

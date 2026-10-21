@@ -7,6 +7,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { ThemeService } from '../../core/theme/theme.service';
 import { MonthlySummary, TrendPoint } from '../../core/models/api-models';
 import { EchartDirective } from '../../shared/charts/echart.directive';
+import { DateRange, DateRangeFilter } from '../../shared/components/date-range-filter';
 import { EmptyState } from '../../shared/components/empty-state';
 import { RevealDirective } from '../../shared/motion/reveal.directive';
 import { CountUpDirective } from '../../shared/motion/count-up.directive';
@@ -14,7 +15,7 @@ import { CountUpDirective } from '../../shared/motion/count-up.directive';
 @Component({
   selector: 'app-insights',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [EchartDirective, EmptyState, DecimalPipe, RevealDirective, CountUpDirective],
+  imports: [EchartDirective, DateRangeFilter, EmptyState, DecimalPipe, RevealDirective, CountUpDirective],
   templateUrl: './insights.html',
   styleUrl: './insights.scss',
 })
@@ -28,6 +29,10 @@ export class Insights implements OnInit {
   protected readonly trend = signal<TrendPoint[]>([]);
   protected readonly loading = signal(true);
   protected readonly currency = signal('SAR');
+  protected readonly fromDate = signal('');
+  protected readonly toDate = signal('');
+  /** True while a from/to range is applied — switches the "vs last month" label to "vs prev. period". */
+  protected readonly ranged = computed(() => !!(this.fromDate() || this.toDate()));
 
 
   protected readonly deltaPct = computed(() => {
@@ -132,14 +137,27 @@ export class Insights implements OnInit {
 
   ngOnInit(): void {
     this.categoriesStore.ensureLoaded();
-    this.api.getSummary().subscribe({
-      next: (s) => {
-        this.summary.set(s);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
+    this.loadSummary();
     this.api.getTrend(6).subscribe({ next: (t) => this.trend.set(t) });
+  }
+
+  onRange(r: DateRange): void {
+    this.fromDate.set(r.from);
+    this.toDate.set(r.to);
+    this.loadSummary();
+  }
+
+  private loadSummary(): void {
+    this.loading.set(true);
+    this.api
+      .getSummary({ from: this.fromDate() || undefined, to: this.toDate() || undefined })
+      .subscribe({
+        next: (s) => {
+          this.summary.set(s);
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
   }
 
   private labelColor(): string {
