@@ -5,12 +5,22 @@ final class InsightsModel: ObservableObject {
     @Published var summary: MonthlySummary?
     @Published var loading = false
     @Published var error: String?
+    @Published var range = DateRange()
     let month = currentMonthKey()
+
+    func apply(_ range: DateRange) async {
+        self.range = range
+        await load()
+    }
 
     func load() async {
         loading = true; error = nil
         defer { loading = false }
-        do { summary = try await ApiClient.shared.summary(month: month) }
+        do {
+            summary = range.isActive
+                ? try await ApiClient.shared.summary(from: range.from, to: range.to)
+                : try await ApiClient.shared.summary(month: month)
+        }
         catch { self.error = (error as? ApiError)?.errorDescription ?? error.localizedDescription }
     }
 }
@@ -24,7 +34,10 @@ struct InsightsView: View {
                 Theme.bg.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
+                        DateRangeFilter { range in Task { await model.apply(range) } }
+                            .padding(.horizontal, -16)
                         if let s = model.summary {
+                            MonoLabel("◆ \(model.range.isActive ? "\(model.range.from) → \(model.range.to)" : model.month)")
                             totals(s)
                             MonoLabel("◆ Spending by category")
                             categoryBars(s)

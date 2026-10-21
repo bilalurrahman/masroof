@@ -61,14 +61,27 @@ final class ApiClient {
         return data
     }
 
-    func ledger(month: String?, page: Int = 1, pageSize: Int = 100) async throws -> PagedResult<Transaction> {
+    /// Lists the ledger. An inclusive `from`/`to` range (yyyy-MM-dd) takes precedence over `month`.
+    func ledger(month: String? = nil, from: String? = nil, to: String? = nil,
+                page: Int = 1, pageSize: Int = 100) async throws -> PagedResult<Transaction> {
         var path = "/transactions?page=\(page)&pageSize=\(pageSize)"
-        if let month, !month.isEmpty { path += "&month=\(month)" }
+        if let from, !from.isEmpty { path += "&from=\(from)" }
+        if let to, !to.isEmpty { path += "&to=\(to)" }
+        if (from?.isEmpty ?? true), (to?.isEmpty ?? true), let month, !month.isEmpty {
+            path += "&month=\(month)"
+        }
         return try JSONDecoder().decode(PagedResult<Transaction>.self, from: try await send(path))
     }
 
-    func summary(month: String) async throws -> MonthlySummary {
-        try JSONDecoder().decode(MonthlySummary.self, from: try await send("/reports/summary?month=\(month)"))
+    /// Monthly summary, or a range summary when `from`/`to` (yyyy-MM-dd, inclusive) are supplied.
+    func summary(month: String? = nil, from: String? = nil, to: String? = nil) async throws -> MonthlySummary {
+        var path = "/reports/summary"
+        var q: [String] = []
+        if let from, !from.isEmpty { q.append("from=\(from)") }
+        if let to, !to.isEmpty { q.append("to=\(to)") }
+        if q.isEmpty, let month, !month.isEmpty { q.append("month=\(month)") }
+        if !q.isEmpty { path += "?" + q.joined(separator: "&") }
+        return try JSONDecoder().decode(MonthlySummary.self, from: try await send(path))
     }
 
     @discardableResult

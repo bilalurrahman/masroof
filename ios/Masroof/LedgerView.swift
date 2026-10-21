@@ -8,14 +8,27 @@ final class LedgerModel: ObservableObject {
     @Published var syncing = false
     @Published var banner: String?
     @Published var error: String?
+    @Published var range = DateRange()
 
     let month = currentMonthKey()
+
+    /// What the header shows for the active period: the picked range, else the current month.
+    var periodLabel: String {
+        range.isActive ? "\(range.from) → \(range.to)" : month
+    }
+
+    func apply(_ range: DateRange) async {
+        self.range = range
+        await load()
+    }
 
     func load() async {
         loading = true; error = nil
         defer { loading = false }
         do {
-            let page = try await ApiClient.shared.ledger(month: month, pageSize: 200)
+            let page = range.isActive
+                ? try await ApiClient.shared.ledger(from: range.from, to: range.to, pageSize: 200)
+                : try await ApiClient.shared.ledger(month: month, pageSize: 200)
             items = page.items
             total = page.total
         } catch {
@@ -65,6 +78,8 @@ struct LedgerView: View {
 
     @ViewBuilder private var content: some View {
         VStack(spacing: 0) {
+            DateRangeFilter { range in Task { await model.apply(range) } }
+                .padding(.top, 4).padding(.bottom, 10)
             header
             if let banner = model.banner {
                 Text(banner)
@@ -106,10 +121,10 @@ struct LedgerView: View {
 
     private var header: some View {
         HStack {
-            MonoLabel("◆ \(model.month) · \(model.total) rows")
+            MonoLabel("◆ \(model.periodLabel) · \(model.total) rows")
             Spacer()
         }
-        .padding(.horizontal, 16).padding(.top, 4).padding(.bottom, 10)
+        .padding(.horizontal, 16).padding(.bottom, 10)
     }
 }
 
