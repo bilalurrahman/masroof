@@ -1,0 +1,142 @@
+import SwiftUI
+
+@MainActor
+final class LedgerModel: ObservableObject {
+    @Published var items: [Transaction] = []
+    @Published var total = 0
+    @Published var loading = false
+    @Published var syncing = false
+    @Published var banner: String?
+    @Published var error: String?
+
+    let month = currentMonthKey()
+
+    func load() async {
+        loading = true; error = nil
+        defer { loading = false }
+        do {
+            let page = try await ApiClient.shared.ledger(month: month, pageSize: 200)
+            items = page.items
+            total = page.total
+        } catch {
+            self.error = (error as? ApiError)?.errorDescription ?? error.localizedDescription
+        }
+    }
+
+    func sync() async {
+        guard !syncing else { return }
+        syncing = true; error = nil
+        defer { syncing = false }
+        do {
+            let r = try await ApiClient.shared.syncSms()
+            banner = "Synced — \(r.imported) new, \(r.duplicates) already there"
+            await load()
+        } catch {
+            self.error = (error as? ApiError)?.errorDescription ?? error.localizedDescription
+        }
+    }
+}
+
+struct LedgerView: View {
+    @StateObject private var model = LedgerModel()
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Theme.bg.ignoresSafeArea()
+                content
+            }
+            .navigationTitle("Ledger")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { Task { await model.sync() } } label: {
+                        if model.syncing {
+                            ProgressView().tint(Theme.accent)
+                        } else {
+                            Label("Sync", systemImage: "arrow.triangle.2.circlepath")
+                        }
+                    }
+                    .disabled(model.syncing)
+                }
+            }
+        }
+        .task { await model.load() }
+    }
+
+    @ViewBuilder private var content: some View {
+        VStack(spacing: 0) {
+            header
+            if let banner = model.banner {
+                Text(banner)
+                    .font(.footnote)
+                    .foregroundStyle(Theme.credit)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16).padding(.vertical, 8)
+            }
+            if let error = model.error {
+                Text(error)
+                    .font(.footnote)
+                    .foregroundStyle(Theme.debit)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16).padding(.vertical, 8)
+            }
+            if model.loading && model.items.isEmpty {
+                Spacer(); ProgressView().tint(Theme.accent); Spacer()
+            } else if model.items.isEmpty {
+                Spacer()
+                VStack(spacing: 8) {
+                    Image(systemName: "tray").font(.largeTitle).foregroundStyle(Theme.muted)
+                    Text("No transactions this month").foregroundStyle(Theme.muted)
+                    Text("Tap Sync to import your bank SMS").font(.caption).foregroundStyle(Theme.muted)
+                }
+                Spacer()
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        ForEach(model.items) { txn in
+                            TransactionRow(txn: txn)
+                            Divider().overlay(Theme.line)
+                        }
+                    }
+                }
+                .refreshable { await model.load() }
+            }
+        }
+    }
+
+    private var header: some View {
+        HStack {
+            MonoLabel("◆ \(model.month) · \(model.total) rows")
+            Spacer()
+        }
+        .padding(.horizontal, 16).padding(.top, 4).padding(.bottom, 10)
+    }
+}
+
+struct TransactionRow: View {
+    let txn: Transaction
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(txn.counterparty ?? "—")
+                    .font(.system(.body, design: .default)).fontWeight(.medium)
+                    .foregroundStyle(Theme.text)
+                HStack(spacing: 8) {
+                    Text(txn.txnDate).font(.caption).foregroundStyle(Theme.muted)
+                    Text(txn.category.name)
+                        .font(.system(.caption2, design: .monospaced))
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(Theme.line)
+                    if let ch = txn.channel {
+                        Text(ch.uppercased()).font(.system(.caption2, design: .monospaced)).foregroundStyle(Theme.muted)
+                    }
+                }
+            }
+            Spacer()
+            Text((txn.isDebit ? "−" : "+") + txn.amount.sar())
+                .font(.system(.body, design: .monospaced)).fontWeight(.semibold)
+                .foregroundStyle(txn.isDebit ? Theme.debit : Theme.credit)
+        }
+        .padding(.horizontal, 16).padding(.vertical, 12)
+    }
+}

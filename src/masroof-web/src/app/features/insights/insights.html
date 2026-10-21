@@ -2,6 +2,8 @@
   <p class="mono-label eyebrow">◆ INSIGHTS</p>
   <h1>{{ i18n.t('insights.heading') }}</h1>
 
+  <app-date-range-filter (rangeChange)="onRange($event)" />
+
   @if (loading()) {
     <div class="grid">
       <div class="skeleton tile-skel"></div>
@@ -17,7 +19,7 @@
           <strong class="debit num"><span class="cur">{{ currency() }}</span> <span [appCountUp]="s.totalDebit"></span></strong>
           @if (deltaPct() !== null) {
             <span class="delta num" [class.up]="deltaPct()! > 0" [class.down]="deltaPct()! < 0">
-              {{ deltaPct()! > 0 ? '▲' : '▼' }} {{ (deltaPct()! | number: '1.0-0') }}% {{ i18n.t('insights.vsLast') }}
+              {{ deltaPct()! > 0 ? '▲' : '▼' }} {{ (deltaPct()! | number: '1.0-0') }}% {{ ranged() ? i18n.t('insights.vsPrev') : i18n.t('insights.vsLast') }}
             </span>
           }
         </div>

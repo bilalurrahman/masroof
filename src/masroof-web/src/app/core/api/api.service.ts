@@ -40,7 +40,9 @@ export class ApiService {
 
   getLedger(filters: LedgerFilters): Observable<PagedResult<TransactionDto>> {
     let params = new HttpParams();
-    if (filters.month) params = params.set('month', filters.month);
+    if (filters.from) params = params.set('from', filters.from);
+    if (filters.to) params = params.set('to', filters.to);
+    if (!filters.from && !filters.to && filters.month) params = params.set('month', filters.month);
     if (filters.category) params = params.set('category', filters.category);
     if (filters.direction) params = params.set('direction', filters.direction);
     if (filters.accountId != null) params = params.set('accountId', filters.accountId);
@@ -58,9 +60,11 @@ export class ApiService {
     return this.http.delete<void>(`${this.base}/transactions/${id}`);
   }
 
-  getSummary(month?: string): Observable<MonthlySummary> {
+  getSummary(opts?: { month?: string; from?: string; to?: string }): Observable<MonthlySummary> {
     let params = new HttpParams();
-    if (month) params = params.set('month', month);
+    if (opts?.from) params = params.set('from', opts.from);
+    if (opts?.to) params = params.set('to', opts.to);
+    if (!opts?.from && !opts?.to && opts?.month) params = params.set('month', opts.month);
     return this.http.get<MonthlySummary>(`${this.base}/reports/summary`, { params });
   }
 

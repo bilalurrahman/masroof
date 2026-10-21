@@ -1,3 +1,4 @@
+using System.Globalization;
 using Dapper;
 using Masroof.Application.Abstractions;
 using Masroof.Application.Reports;
@@ -47,6 +48,60 @@ public sealed class ReportQueries(ISqlConnectionFactory factory, ICurrentUser cu
 
         return new MonthlySummary(
             Month: $"{year:D4}-{month:D2}",
+            TotalDebit: totals.Debit,
+            TotalCredit: totals.Credit,
+            TransactionCount: totals.Cnt,
+            PreviousMonthDebit: prevDebit,
+            ByCategory: byCategory);
+    }
+
+    public async Task<MonthlySummary> GetRangeSummaryAsync(Guid userId, DateOnly from, DateOnly to, CancellationToken ct)
+    {
+        // Normalize to inclusive-from / exclusive-to, then size the preceding comparison window to match.
+        if (to < from) (from, to) = (to, from);
+        var toExclusive = to.AddDays(1);
+        var lengthDays = toExclusive.DayNumber - from.DayNumber;
+        var prevFrom = from.AddDays(-lengthDays);
+
+        await using var conn = await factory.OpenAsync(ct);
+
+        var totals = await conn.QuerySingleAsync<(decimal Debit, decimal Credit, int Cnt)>(new CommandDefinition(
+            """
+            SELECT
+              COALESCE(SUM(CASE WHEN t.Direction='debit'  THEN t.Amount END),0) AS Debit,
+              COALESCE(SUM(CASE WHEN t.Direction='credit' THEN t.Amount END),0) AS Credit,
+              COUNT(*) AS Cnt
+            FROM dbo.Transactions t
+            JOIN dbo.Categories c ON c.CategoryId = t.CategoryId
+            WHERE t.UserId=@userId AND t.IsDeleted=0 AND c.ExcludeFromTotals=0
+                  AND t.TxnDate>=@from AND t.TxnDate<@toExclusive;
+            """, new { userId, from, toExclusive }, cancellationToken: ct));
+
+        var prevDebit = await conn.ExecuteScalarAsync<decimal?>(new CommandDefinition(
+            """
+            SELECT COALESCE(SUM(CASE WHEN t.Direction='debit' THEN t.Amount END),0)
+            FROM dbo.Transactions t
+            JOIN dbo.Categories c ON c.CategoryId = t.CategoryId
+            WHERE t.UserId=@userId AND t.IsDeleted=0 AND c.ExcludeFromTotals=0
+                  AND t.TxnDate>=@prevFrom AND t.TxnDate<@from;
+            """, new { userId, prevFrom, from }, cancellationToken: ct)) ?? 0m;
+
+        var byCategory = (await conn.QueryAsync<CategoryRow>(new CommandDefinition(
+            """
+            SELECT c.Code, c.NameEn, c.NameAr, SUM(t.Amount) AS Total, COUNT(*) AS Cnt
+            FROM dbo.Transactions t
+            JOIN dbo.Categories c ON c.CategoryId = t.CategoryId
+            WHERE t.UserId=@userId AND t.IsDeleted=0 AND t.Direction='debit' AND c.ExcludeFromTotals=0
+                  AND t.TxnDate>=@from AND t.TxnDate<@toExclusive
+            GROUP BY c.Code, c.NameEn, c.NameAr
+            ORDER BY Total DESC;
+            """, new { userId, from, toExclusive }, cancellationToken: ct)))
+            .Select(r => new CategoryTotal(r.Code, IsArabic ? r.NameAr : r.NameEn, r.Total, r.Cnt)).ToList();
+
+        // Format explicitly as Gregorian ISO — interpolating a DateOnly uses the current culture,
+        // which is ar-SA here and would render Hijri dates.
+        return new MonthlySummary(
+            Month: $"{from.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)} → {to.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}",
             TotalDebit: totals.Debit,
             TotalCredit: totals.Credit,
             TransactionCount: totals.Cnt,

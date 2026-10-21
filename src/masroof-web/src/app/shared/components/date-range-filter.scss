@@ -1,0 +1,91 @@
+.range {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.presets {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 0.32rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+.chip:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+.chip.on {
+  background: var(--ok);
+  border-color: var(--ok);
+  color: #06230f;
+}
+
+.dates {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.55rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.field .mono-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+}
+.field .input {
+  width: auto;
+  padding: 0.38rem 0.5rem;
+  font-size: 0.82rem;
+  color-scheme: dark light;
+}
+
+.arrow {
+  color: var(--text-muted);
+  padding-bottom: 0.45rem;
+}
+
+.clear {
+  align-self: flex-end;
+  padding: 0.38rem 0.6rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.clear:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+@media (max-width: 560px) {
+  .range {
+    justify-content: stretch;
+  }
+  .dates {
+    flex-wrap: wrap;
+  }
+}
