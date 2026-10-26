@@ -9,6 +9,9 @@ public sealed record MerchantTotal(string Counterparty, decimal Total, int Count
 /// <summary>One month of the trend series: total debits and credits.</summary>
 public sealed record TrendPoint(string Month, decimal Debit, decimal Credit);
 
+/// <summary>Spent/received totals for one bank in the monitored group, over a period.</summary>
+public sealed record BankTotal(string BankCode, string BankName, decimal Debit, decimal Credit, int Count);
+
 /// <summary>A compact transaction row for search results and "data used" tables.</summary>
 public sealed record TxnLite(
     long Id,

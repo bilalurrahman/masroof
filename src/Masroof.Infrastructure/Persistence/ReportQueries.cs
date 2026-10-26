@@ -131,6 +131,35 @@ public sealed class ReportQueries(ISqlConnectionFactory factory, ICurrentUser cu
         return rows.Select(r => new TrendPoint(r.Month, r.Debit, r.Credit)).ToList();
     }
 
+    public async Task<IReadOnlyList<BankTotal>> GetSpendByBankAsync(Guid userId, DateOnly from, DateOnly to, CancellationToken ct)
+    {
+        if (to < from) (from, to) = (to, from);
+        var toExclusive = to.AddDays(1);
+
+        await using var conn = await factory.OpenAsync(ct);
+        var rows = (await conn.QueryAsync<(string BankCode, decimal Debit, decimal Credit, int Cnt)>(new CommandDefinition(
+            """
+            SELECT a.BankCode,
+                   COALESCE(SUM(CASE WHEN t.Direction='debit'  THEN t.Amount END),0) AS Debit,
+                   COALESCE(SUM(CASE WHEN t.Direction='credit' THEN t.Amount END),0) AS Credit,
+                   COUNT(*) AS Cnt
+            FROM dbo.Transactions t
+            JOIN dbo.Accounts a ON a.AccountId = t.AccountId
+            WHERE t.UserId=@userId AND t.IsDeleted=0 AND a.BankCode IN @codes
+                  AND t.TxnDate>=@from AND t.TxnDate<@toExclusive
+            GROUP BY a.BankCode;
+            """, new { userId, from, toExclusive, codes = BankGroup.Codes }, cancellationToken: ct)))
+            .ToDictionary(r => r.BankCode, r => r);
+
+        // Return every group member (zeros included), biggest spender first, then the fixed order.
+        return BankGroup.Members
+            .Select(m => rows.TryGetValue(m.Code, out var r)
+                ? new BankTotal(m.Code, m.Name, r.Debit, r.Credit, r.Cnt)
+                : new BankTotal(m.Code, m.Name, 0m, 0m, 0))
+            .OrderByDescending(b => b.Debit)
+            .ToList();
+    }
+
     public async Task<IReadOnlyList<CategoryTotal>> GetSpendByCategoryAsync(Guid userId, int year, int month, CancellationToken ct)
     {
         var from = new DateOnly(year, month, 1);

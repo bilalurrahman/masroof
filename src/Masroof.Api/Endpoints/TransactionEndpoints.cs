@@ -97,12 +97,13 @@ public static class TransactionEndpoints
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 50,
         [FromQuery] DateOnly? from = null,
-        [FromQuery] DateOnly? to = null)
+        [FromQuery] DateOnly? to = null,
+        [FromQuery] string? bank = null)
     {
         int? year = null, mon = null;
         if (MonthKey.TryParse(month, out var key)) { year = key.Year; mon = key.Month; }
 
-        var query = new GetLedgerQuery(year, mon, category, direction, accountId, q, needsReview, page, pageSize, from, to);
+        var query = new GetLedgerQuery(year, mon, category, direction, accountId, q, needsReview, page, pageSize, from, to, bank);
         var result = await handler.HandleAsync(query, ct);
         return Results.Ok(result);
     }

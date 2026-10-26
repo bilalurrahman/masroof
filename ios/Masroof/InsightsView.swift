@@ -3,6 +3,7 @@ import SwiftUI
 @MainActor
 final class InsightsModel: ObservableObject {
     @Published var summary: MonthlySummary?
+    @Published var banks: [BankTotal] = []
     @Published var loading = false
     @Published var error: String?
     @Published var range = DateRange()
@@ -17,9 +18,13 @@ final class InsightsModel: ObservableObject {
         loading = true; error = nil
         defer { loading = false }
         do {
-            summary = range.isActive
-                ? try await ApiClient.shared.summary(from: range.from, to: range.to)
-                : try await ApiClient.shared.summary(month: month)
+            if range.isActive {
+                summary = try await ApiClient.shared.summary(from: range.from, to: range.to)
+                banks = try await ApiClient.shared.byBank(from: range.from, to: range.to)
+            } else {
+                summary = try await ApiClient.shared.summary(month: month)
+                banks = try await ApiClient.shared.byBank(month: month)
+            }
         }
         catch { self.error = (error as? ApiError)?.errorDescription ?? error.localizedDescription }
     }
@@ -39,6 +44,9 @@ struct InsightsView: View {
                         if let s = model.summary {
                             MonoLabel("◆ \(model.range.isActive ? "\(model.range.from) → \(model.range.to)" : model.month)")
                             totals(s)
+                            if !model.banks.isEmpty {
+                                bankSection
+                            }
                             MonoLabel("◆ Spending by category")
                             categoryBars(s)
                         } else if model.loading {
@@ -54,6 +62,47 @@ struct InsightsView: View {
             .navigationTitle("Insights")
         }
         .task { await model.load() }
+    }
+
+    @ViewBuilder private var bankSection: some View {
+        let maxDebit = max(1, model.banks.map(\.debit).max() ?? 1)
+        let grand = model.banks.reduce(0) { $0 + $1.debit }
+        Panel {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack {
+                    MonoLabel("◆ Bank accounts")
+                    Spacer()
+                    Text(grand.sar())
+                        .font(.system(.subheadline, design: .monospaced)).fontWeight(.semibold)
+                        .foregroundStyle(Theme.debit)
+                }
+                ForEach(model.banks) { b in
+                    VStack(alignment: .leading, spacing: 5) {
+                        HStack(spacing: 8) {
+                            RoundedRectangle(cornerRadius: 2)
+                                .fill(BankGroup.color(b.bankCode))
+                                .frame(width: 9, height: 9)
+                            Text(b.bankName).font(.subheadline).foregroundStyle(Theme.text)
+                            Text("\(b.count) TXN").font(.system(.caption2, design: .monospaced)).foregroundStyle(Theme.muted)
+                            Spacer()
+                            Text("−\(b.debit.decimal())").font(.system(.caption, design: .monospaced)).foregroundStyle(Theme.debit)
+                            if b.credit > 0 {
+                                Text("+\(b.credit.decimal())").font(.system(.caption, design: .monospaced)).foregroundStyle(Theme.credit)
+                            }
+                        }
+                        GeometryReader { geo in
+                            ZStack(alignment: .leading) {
+                                Capsule().fill(Theme.line).frame(height: 6)
+                                Capsule().fill(BankGroup.color(b.bankCode))
+                                    .frame(width: max(2, geo.size.width * (b.debit / maxDebit)), height: 6)
+                            }
+                        }
+                        .frame(height: 6)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 
     private func totals(_ s: MonthlySummary) -> some View {

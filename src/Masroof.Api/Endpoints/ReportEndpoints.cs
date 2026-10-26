@@ -13,6 +13,35 @@ public static class ReportEndpoints
 
         group.MapGet("/reports/trend", TrendAsync)
             .WithSummary("Monthly debit/credit series for charts.");
+
+        group.MapGet("/reports/by-bank", ByBankAsync)
+            .WithSummary("Spent/received per bank (D360, STC, SABB, Alinma, tiqmo) for monitoring.");
+    }
+
+    private static async Task<IResult> ByBankAsync(
+        IReportQueries reports,
+        ICurrentUser currentUser,
+        IClock clock,
+        CancellationToken ct,
+        [FromQuery] string? month = null,
+        [FromQuery] DateOnly? from = null,
+        [FromQuery] DateOnly? to = null)
+    {
+        DateOnly f, t;
+        if (from is not null || to is not null)
+        {
+            f = from ?? to!.Value;
+            t = to ?? from!.Value;
+        }
+        else
+        {
+            var key = MonthKey.TryParse(month, out var parsed) ? parsed : MonthKey.FromDate(clock.Today);
+            f = new DateOnly(key.Year, key.Month, 1);
+            t = f.AddMonths(1).AddDays(-1);
+        }
+
+        var banks = await reports.GetSpendByBankAsync(currentUser.UserId, f, t, ct);
+        return Results.Ok(banks);
     }
 
     private static async Task<IResult> SummaryAsync(

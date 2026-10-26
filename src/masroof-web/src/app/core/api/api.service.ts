@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import {
   AccountDto,
   AskResponse,
+  BankTotal,
   CategoryDto,
   JobAccepted,
   LedgerFilters,
@@ -43,6 +44,7 @@ export class ApiService {
     if (filters.from) params = params.set('from', filters.from);
     if (filters.to) params = params.set('to', filters.to);
     if (!filters.from && !filters.to && filters.month) params = params.set('month', filters.month);
+    if (filters.bank) params = params.set('bank', filters.bank);
     if (filters.category) params = params.set('category', filters.category);
     if (filters.direction) params = params.set('direction', filters.direction);
     if (filters.accountId != null) params = params.set('accountId', filters.accountId);
@@ -72,6 +74,15 @@ export class ApiService {
     return this.http.get<TrendPoint[]>(`${this.base}/reports/trend`, {
       params: new HttpParams().set('months', months),
     });
+  }
+
+  /** Spent/received per bank in the monitored group for the given range (defaults to this month). */
+  getByBank(opts?: { month?: string; from?: string; to?: string }): Observable<BankTotal[]> {
+    let params = new HttpParams();
+    if (opts?.from) params = params.set('from', opts.from);
+    if (opts?.to) params = params.set('to', opts.to);
+    if (!opts?.from && !opts?.to && opts?.month) params = params.set('month', opts.month);
+    return this.http.get<BankTotal[]>(`${this.base}/reports/by-bank`, { params });
   }
 
   ask(question: string): Observable<AskResponse> {

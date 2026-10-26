@@ -19,6 +19,13 @@ public interface IReportQueries
 
     Task<IReadOnlyList<TrendPoint>> GetTrendAsync(Guid userId, int months, CancellationToken ct);
 
+    /// <summary>
+    /// Spent/received totals per bank in the monitored group (<see cref="BankGroup"/>) over an
+    /// inclusive <paramref name="from"/>/<paramref name="to"/> range. Every group member is returned,
+    /// including those with no activity, ordered by spend.
+    /// </summary>
+    Task<IReadOnlyList<BankTotal>> GetSpendByBankAsync(Guid userId, DateOnly from, DateOnly to, CancellationToken ct);
+
     Task<IReadOnlyList<CategoryTotal>> GetSpendByCategoryAsync(Guid userId, int year, int month, CancellationToken ct);
 
     Task<IReadOnlyList<MerchantTotal>> GetTopMerchantsAsync(Guid userId, DateOnly from, DateOnly to, int n, CancellationToken ct);

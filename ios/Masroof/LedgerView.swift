@@ -9,6 +9,7 @@ final class LedgerModel: ObservableObject {
     @Published var banner: String?
     @Published var error: String?
     @Published var range = DateRange()
+    @Published var bank = ""   // "" = all banks
 
     let month = currentMonthKey()
 
@@ -22,13 +23,19 @@ final class LedgerModel: ObservableObject {
         await load()
     }
 
+    func toggleBank(_ code: String) async {
+        bank = (bank == code) ? "" : code
+        await load()
+    }
+
     func load() async {
         loading = true; error = nil
         defer { loading = false }
         do {
+            let bankParam = bank.isEmpty ? nil : bank
             let page = range.isActive
-                ? try await ApiClient.shared.ledger(from: range.from, to: range.to, pageSize: 200)
-                : try await ApiClient.shared.ledger(month: month, pageSize: 200)
+                ? try await ApiClient.shared.ledger(from: range.from, to: range.to, bank: bankParam, pageSize: 200)
+                : try await ApiClient.shared.ledger(month: month, bank: bankParam, pageSize: 200)
             items = page.items
             total = page.total
         } catch {
@@ -79,7 +86,8 @@ struct LedgerView: View {
     @ViewBuilder private var content: some View {
         VStack(spacing: 0) {
             DateRangeFilter { range in Task { await model.apply(range) } }
-                .padding(.top, 4).padding(.bottom, 10)
+                .padding(.top, 4).padding(.bottom, 8)
+            bankChips
             header
             if let banner = model.banner {
                 Text(banner)
@@ -117,6 +125,36 @@ struct LedgerView: View {
                 .refreshable { await model.load() }
             }
         }
+    }
+
+    private var bankChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                bankChip(code: "", label: "All banks")
+                ForEach(BankGroup.members) { m in
+                    bankChip(code: m.code, label: m.name, color: m.color)
+                }
+            }
+            .padding(.horizontal, 16)
+        }
+        .padding(.bottom, 8)
+    }
+
+    private func bankChip(code: String, label: String, color: Color? = nil) -> some View {
+        let on = model.bank == code
+        return Button { Task { await model.toggleBank(code) } } label: {
+            HStack(spacing: 6) {
+                if let color {
+                    Circle().fill(color).frame(width: 7, height: 7)
+                }
+                Text(label).font(.caption).fontWeight(.semibold)
+            }
+            .padding(.horizontal, 12).padding(.vertical, 7)
+            .background(on ? Theme.accent : Theme.line)
+            .foregroundStyle(on ? Color(red: 0.02, green: 0.09, blue: 0.16) : Theme.text)
+            .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
     }
 
     private var header: some View {

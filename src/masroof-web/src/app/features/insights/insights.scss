@@ -40,6 +40,74 @@
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 0.8rem;
 }
+
+/* Bank accounts monitoring group */
+.banks-card {
+  margin-bottom: 1rem;
+}
+.banks-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.9rem;
+}
+.banks-head h2 {
+  font-size: 0.95rem;
+  margin: 0;
+}
+.banks-total {
+  color: var(--danger);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.bank-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.bank-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.3rem;
+}
+.bank-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+.bank-name .dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 2px;
+  flex: none;
+}
+.bank-count {
+  margin-inline-start: 0.35rem;
+  font-size: 0.62rem;
+}
+.bank-amounts {
+  display: inline-flex;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.bar-track {
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  min-width: 2px;
+  transition: width 0.4s ease;
+}
 .chart-card h2 {
   font-size: 0.95rem;
 }

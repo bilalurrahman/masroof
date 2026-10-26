@@ -5,7 +5,7 @@ import { ApiService } from '../../core/api/api.service';
 import { CategoriesStore } from '../../core/data/categories.store';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ThemeService } from '../../core/theme/theme.service';
-import { MonthlySummary, TrendPoint } from '../../core/models/api-models';
+import { BankTotal, MonthlySummary, TrendPoint } from '../../core/models/api-models';
 import { EchartDirective } from '../../shared/charts/echart.directive';
 import { DateRange, DateRangeFilter } from '../../shared/components/date-range-filter';
 import { EmptyState } from '../../shared/components/empty-state';
@@ -27,6 +27,7 @@ export class Insights implements OnInit {
 
   protected readonly summary = signal<MonthlySummary | null>(null);
   protected readonly trend = signal<TrendPoint[]>([]);
+  protected readonly banks = signal<BankTotal[]>([]);
   protected readonly loading = signal(true);
   protected readonly currency = signal('SAR');
   protected readonly fromDate = signal('');
@@ -46,6 +47,17 @@ export class Insights implements OnInit {
   private readonly MONO = "'Geist Mono', ui-monospace, monospace";
   private readonly DEBIT = '#f87171';
   private readonly CREDIT = '#4ade80';
+
+  private readonly BANK_COLORS: Record<string, string> = {
+    D360: '#60a5fa',
+    STCBANK: '#a78bfa',
+    SABB: '#f59e0b',
+    ALINMA: '#34d399',
+    TIQMO: '#f472b6',
+  };
+  protected bankColor(code: string): string {
+    return this.BANK_COLORS[code] ?? '#8c8e94';
+  }
 
   protected readonly donutOption = computed<EChartsCoreOption | null>(() => {
     const s = this.summary();
@@ -149,16 +161,24 @@ export class Insights implements OnInit {
 
   private loadSummary(): void {
     this.loading.set(true);
-    this.api
-      .getSummary({ from: this.fromDate() || undefined, to: this.toDate() || undefined })
-      .subscribe({
-        next: (s) => {
-          this.summary.set(s);
-          this.loading.set(false);
-        },
-        error: () => this.loading.set(false),
-      });
+    const range = { from: this.fromDate() || undefined, to: this.toDate() || undefined };
+    this.api.getSummary(range).subscribe({
+      next: (s) => {
+        this.summary.set(s);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
+    this.api.getByBank(range).subscribe({ next: (b) => this.banks.set(b) });
   }
+
+  /** Largest per-bank spend in the current breakdown, for scaling the bars. */
+  protected readonly maxBankDebit = computed(() =>
+    Math.max(1, ...this.banks().map((b) => b.debit)),
+  );
+  protected readonly bankGrandTotal = computed(() =>
+    this.banks().reduce((sum, b) => sum + b.debit, 0),
+  );
 
   private labelColor(): string {
     return this.theme.theme() === 'dark' ? '#8c8e94' : '#5c5e66';

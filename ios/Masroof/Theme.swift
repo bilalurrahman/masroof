@@ -14,15 +14,17 @@ enum Theme {
 }
 
 extension Double {
-    /// "SAR 1,234.50"
-    func sar() -> String {
+    /// "1,234.50" — grouped, two decimals, no currency.
+    func decimal() -> String {
         let f = NumberFormatter()
         f.numberStyle = .decimal
         f.minimumFractionDigits = 2
         f.maximumFractionDigits = 2
-        let n = f.string(from: NSNumber(value: self)) ?? String(format: "%.2f", self)
-        return "SAR \(n)"
+        return f.string(from: NSNumber(value: self)) ?? String(format: "%.2f", self)
     }
+
+    /// "SAR 1,234.50"
+    func sar() -> String { "SAR \(decimal())" }
 }
 
 struct MonoLabel: View {
