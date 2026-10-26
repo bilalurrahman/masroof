@@ -12,4 +12,5 @@ public sealed record GetLedgerQuery(
     int Page = 1,
     int PageSize = 50,
     DateOnly? From = null,
-    DateOnly? To = null);
+    DateOnly? To = null,
+    string? BankCode = null);

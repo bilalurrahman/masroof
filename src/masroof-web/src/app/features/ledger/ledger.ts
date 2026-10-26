@@ -37,7 +37,17 @@ export class Ledger implements OnInit {
 
   protected readonly fromDate = signal('');
   protected readonly toDate = signal('');
+  protected readonly bank = signal('');
   protected readonly category = signal('');
+
+  /** The monitored bank group, for the Ledger's quick bank filter. */
+  protected readonly bankGroup = [
+    { code: 'D360', name: 'D360' },
+    { code: 'STCBANK', name: 'STC Bank' },
+    { code: 'SABB', name: 'SABB' },
+    { code: 'ALINMA', name: 'Alinma' },
+    { code: 'TIQMO', name: 'tiqmo' },
+  ];
   protected readonly direction = signal<'' | Direction>('');
   protected readonly search = signal('');
   protected readonly needsReview = signal(false);
@@ -70,12 +80,18 @@ export class Ledger implements OnInit {
     this.applyFilters();
   }
 
+  toggleBank(code: string): void {
+    this.bank.set(this.bank() === code ? '' : code);
+    this.applyFilters();
+  }
+
   load(): void {
     this.loading.set(true);
     this.api
       .getLedger({
         from: this.fromDate() || undefined,
         to: this.toDate() || undefined,
+        bank: this.bank() || undefined,
         category: this.category() || undefined,
         direction: this.direction() || undefined,
         q: this.search() || undefined,

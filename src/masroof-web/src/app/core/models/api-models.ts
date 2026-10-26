@@ -78,6 +78,14 @@ export interface TrendPoint {
   credit: number;
 }
 
+export interface BankTotal {
+  bankCode: string;
+  bankName: string;
+  debit: number;
+  credit: number;
+  count: number;
+}
+
 export interface RuleDto {
   ruleId: number;
   subject: string;
@@ -137,6 +145,8 @@ export interface LedgerFilters {
   from?: string;
   /** Inclusive end of a date range (yyyy-MM-dd). */
   to?: string;
+  /** Filter to one bank in the monitored group (D360, STCBANK, SABB, ALINMA, TIQMO). */
+  bank?: string;
   category?: string;
   direction?: Direction;
   accountId?: number;

@@ -30,6 +30,41 @@
         </div>
       </div>
 
+      @if (banks().length > 0) {
+        <div class="card banks-card" appReveal [revealDelay]="120">
+          <div class="banks-head">
+            <h2>{{ i18n.t('insights.banks') }}</h2>
+            <span class="banks-total num">{{ currency() }} {{ bankGrandTotal() | number: '1.0-0' }}</span>
+          </div>
+          <div class="bank-rows">
+            @for (b of banks(); track b.bankCode) {
+              <div class="bank-row">
+                <div class="bank-line">
+                  <span class="bank-name">
+                    <span class="dot" [style.background]="bankColor(b.bankCode)"></span>
+                    {{ b.bankName }}
+                    <span class="bank-count mono-label">{{ b.count }} TXN</span>
+                  </span>
+                  <span class="bank-amounts num">
+                    <span class="debit">−{{ b.debit | number: '1.2-2' }}</span>
+                    @if (b.credit > 0) {
+                      <span class="credit">+{{ b.credit | number: '1.2-2' }}</span>
+                    }
+                  </span>
+                </div>
+                <div class="bar-track">
+                  <span
+                    class="bar-fill"
+                    [style.width.%]="(b.debit / maxBankDebit()) * 100"
+                    [style.background]="bankColor(b.bankCode)"
+                  ></span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
       <div class="grid">
         <div class="card chart-card" appReveal [revealDelay]="160">
           <h2>{{ i18n.t('insights.byCategory') }}</h2>

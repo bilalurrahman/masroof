@@ -62,15 +62,28 @@ final class ApiClient {
     }
 
     /// Lists the ledger. An inclusive `from`/`to` range (yyyy-MM-dd) takes precedence over `month`.
+    /// `bank` filters to one provider in the monitored group (e.g. "D360", "STCBANK").
     func ledger(month: String? = nil, from: String? = nil, to: String? = nil,
-                page: Int = 1, pageSize: Int = 100) async throws -> PagedResult<Transaction> {
+                bank: String? = nil, page: Int = 1, pageSize: Int = 100) async throws -> PagedResult<Transaction> {
         var path = "/transactions?page=\(page)&pageSize=\(pageSize)"
         if let from, !from.isEmpty { path += "&from=\(from)" }
         if let to, !to.isEmpty { path += "&to=\(to)" }
         if (from?.isEmpty ?? true), (to?.isEmpty ?? true), let month, !month.isEmpty {
             path += "&month=\(month)"
         }
+        if let bank, !bank.isEmpty { path += "&bank=\(bank)" }
         return try JSONDecoder().decode(PagedResult<Transaction>.self, from: try await send(path))
+    }
+
+    /// Spent/received per bank in the monitored group for the given range (defaults to this month).
+    func byBank(month: String? = nil, from: String? = nil, to: String? = nil) async throws -> [BankTotal] {
+        var path = "/reports/by-bank"
+        var q: [String] = []
+        if let from, !from.isEmpty { q.append("from=\(from)") }
+        if let to, !to.isEmpty { q.append("to=\(to)") }
+        if q.isEmpty, let month, !month.isEmpty { q.append("month=\(month)") }
+        if !q.isEmpty { path += "?" + q.joined(separator: "&") }
+        return try JSONDecoder().decode([BankTotal].self, from: try await send(path))
     }
 
     /// Monthly summary, or a range summary when `from`/`to` (yyyy-MM-dd, inclusive) are supplied.

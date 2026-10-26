@@ -45,6 +45,15 @@ struct MonthlySummary: Codable {
     let byCategory: [CategoryTotal]
 }
 
+struct BankTotal: Codable, Identifiable {
+    let bankCode: String
+    let bankName: String
+    let debit: Double
+    let credit: Double
+    let count: Int
+    var id: String { bankCode }
+}
+
 struct SmsSyncResult: Codable {
     let scanned: Int
     let imported: Int

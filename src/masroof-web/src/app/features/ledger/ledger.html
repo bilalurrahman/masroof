@@ -16,6 +16,29 @@
 
   <app-date-range-filter (rangeChange)="onRange($event)" />
 
+  <div class="bank-chips">
+    <button
+      appPress
+      type="button"
+      class="bank-chip"
+      [class.on]="bank() === ''"
+      (click)="toggleBank('')"
+    >
+      {{ i18n.t('ledger.allBanks') }}
+    </button>
+    @for (b of bankGroup; track b.code) {
+      <button
+        appPress
+        type="button"
+        class="bank-chip"
+        [class.on]="bank() === b.code"
+        (click)="toggleBank(b.code)"
+      >
+        {{ b.name }}
+      </button>
+    }
+  </div>
+
   <div class="filters card">
     <select class="input" [ngModel]="category()" (ngModelChange)="category.set($event); applyFilters()">
       <option value="">{{ i18n.t('ledger.all') }}</option>

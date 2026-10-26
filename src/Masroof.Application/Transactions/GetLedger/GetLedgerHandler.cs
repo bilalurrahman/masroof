@@ -51,6 +51,9 @@ public sealed class GetLedgerHandler(IAppDbContext db, ICurrentUser currentUser)
         if (query.AccountId is { } accountId)
             q = q.Where(t => t.AccountId == accountId);
 
+        if (!string.IsNullOrWhiteSpace(query.BankCode))
+            q = q.Where(t => t.Account != null && t.Account.BankCode == query.BankCode);
+
         if (!string.IsNullOrWhiteSpace(query.Search))
         {
             var term = query.Search.Trim();
